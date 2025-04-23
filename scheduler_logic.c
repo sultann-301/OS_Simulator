@@ -18,7 +18,7 @@ int codeCounts[3];
 int quantumLeft = 3;
 int quantum = 3;
 int clock = 0;
-int sched_code;
+int sched_code = 0;
 
 struct Process {
     int pid;                
@@ -198,10 +198,7 @@ int peekPQ(struct PriorityQueue* pq)
     return pq->items[0];
 }
 
-struct Queue lvl1Q;
-struct Queue lvl2Q;
-struct Queue lvl3Q;
-struct Queue lvl4Q;
+
 struct Queue qs[4];
 int quantumLefts[3];
 
@@ -251,7 +248,7 @@ char* getVariableValue(const char* key, char vars[3][50]) {
     return NULL; // not found
 }
 
-int countLines(char program[60][100]){
+int countLines(char program[12][100]){
     int count = 0;
     int i=0;
     while (strcmp(program[i],"end")!=0) {
@@ -318,7 +315,7 @@ char* func3ThatReturnsInsteadOfPrints(char* fname){
     return NULL;
 }
 
-void readProgram(const char *filename, char program[60][100]) {
+void readProgram(const char *filename, char program[12][100]) {
 
     fptr = fopen(filename, "r");
         if (fptr == NULL)
@@ -341,7 +338,7 @@ void readProgram(const char *filename, char program[60][100]) {
     }
 }
 
-void storeProgram(char program[60][100]){
+void storeProgram(char program[12][100]){
     struct Process p;
     int programSize = 9 + countLines(program);
     p.pid = id;
@@ -834,10 +831,7 @@ void dump_state_to_json(const char *filename) {
     fprintf(f, "  \"sched_code\": %d,\n", sched_code);
 
     // queues
-    print_queue(f, "lvl1Q", &lvl1Q); fprintf(f, ",\n");
-    print_queue(f, "lvl2Q", &lvl2Q); fprintf(f, ",\n");
-    print_queue(f, "lvl3Q", &lvl3Q); fprintf(f, ",\n");
-    print_queue(f, "lvl4Q", &lvl4Q); fprintf(f, ",\n");
+    
 
     // qs array
     fprintf(f, "  \"qs\": [\n");
@@ -901,43 +895,37 @@ void dump_state_to_json(const char *filename) {
 
 int main()
 {
-    // const char* data[] = {
-    // "name : Alice",
-    // "age : 25",,
-    // "city : Wonderland"
-    // };
-    // printf("%s", getVariableValue("name", data));
-
-    // struct Line l = parse("assign b readFile x");
-    // printf("%d", strncmp(l.op2, "readFile", 8));
     int (*schedulers[])() = { FIFO_time, RR_time, MLFQ_time };
     int (*notDone[])() = { notEmptyReadyQ, notEmptyReadyQ, isMLFQFull };
-    int arrivals[3];
-   
+    int arrival1 = 0;
+    int arrival2 = 0;
+    int arrival3 = 0;
     printf("please enter sched code 0/1/2 \n");
     scanf("%d", &sched_code);
     
     printf("please enter desired quantum time good sir: ");
     scanf("%d", &quantum);
     printf("please enter arrival time for process 1: ");
-    scanf("%d", &arrivals[0]);
+    scanf("%d", &arrival1);
     printf("please enter arrival time for process 2: ");
-    scanf("%d", &arrivals[1]);
+    scanf("%d", &arrival2);
     printf("please enter arrival time for process 3: ");
-    scanf("%d", &arrivals[2]);
+    scanf("%d", &arrival3);
 
 
 
 
     quantumLeft = quantum;
-    char program1 [60][100];
-    char program2 [60][100];
-    char program3 [60][100];
+    char program1 [12][100];
+    char program2 [12][100];
+    char program3 [12][100];
     initializeQueue(&readyQ);
     initializeQueue(&qs[0]);
     initializeQueue(&qs[1]);
     initializeQueue(&qs[2]);
     initializeQueue(&qs[3]);
+    
+
     
     readProgram("Program_4.txt", program1);
     readProgram("Program_5.txt", program2);
@@ -952,13 +940,13 @@ int main()
         quantumLefts[i] = 1;
     }
     int maxArrival = 0;
-    for(int i = 0 ; i < 3; i++)
-    {
-        if(arrivals[i] > maxArrival)
-        {
-            maxArrival = arrivals[i];
-        }
-    }
+    // for(int i = 0 ; i < 3; i++)
+    // {
+    //     if(arrivals[i] > maxArrival)
+    //     {
+    //         maxArrival = arrivals[i];
+    //     }
+    // }
 
     int x = 1;
     while(notDone[sched_code]() == 1 || clock <= maxArrival)
@@ -966,7 +954,12 @@ int main()
         {
             return 0;
         }
-        if(clock == arrivals[0]){
+        
+        printf("arrival[1]: %d \n",arrival1);
+        printf("arrival[2]: %d \n",arrival2);
+        printf("arrival[3]: %d \n",arrival3);
+        
+        if(clock == arrival1){
             printf("Process (%d) arrived!\n", id);
             enqueue(&qs[0], id);
             enqueue(&readyQ, id);
@@ -974,13 +967,13 @@ int main()
     
     
         }
-        if(clock == arrivals[1]){
+        if(clock == arrival2){
             printf("Process (%d) arrived!\n", id);
             enqueue(&qs[0], id);
             enqueue(&readyQ, id);
             storeProgram(program2);
         }
-        if(clock == arrivals[2]){
+        if(clock == arrival3){
             printf("Process (%d) arrived!\n", id);
             enqueue(&qs[0], id);
             enqueue(&readyQ, id);
@@ -990,6 +983,7 @@ int main()
         // printf("Q state: %d \n",isEmpty(&readyQ));
         // printf("Code counts 2:  %d \n", codeCounts[0]);
         dump_state_to_json("dumpster.txt");
+        // printf("sched code: %d \n", sched_code);
         executeNextLine(schedulers[sched_code]());
         while(!scanf("%d", &x));
         clock++;
