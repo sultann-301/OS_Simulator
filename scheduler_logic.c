@@ -328,8 +328,10 @@ void readProgram(const char *filename, char program[12][100]) {
     int i=0;
     // Read the content and print it
     while(fgets(myString, 100, fptr)) {
-        sprintf(program[i],"%s",myString);
-        i++;
+        if (strlen(myString) > 4){
+            sprintf(program[i],"%s",myString);
+            i++;
+        }
     }
     sprintf(program[i],"end");
     
@@ -461,8 +463,7 @@ void execute(char line[100], struct Process *p){
     struct Line l = parse(line);
     
     if (strcmp(l.operation, "print") == 0){
-        // printf("%s\n", getVariableValue(l.op1, p->vars));
-        printf("%s\n", l.op1);
+        printf("%s\n", getVariableValue(l.op1, p->vars));
         return;
     }
 
@@ -721,6 +722,7 @@ int RR_time()
 {
 
     int curr_id = peek(&readyQ);
+    printf("%d >= %d??\n",memory[curr_id].pc ,codeCounts[curr_id]);
     if(memory[curr_id].pc >= codeCounts[curr_id])
     {
         //process done
@@ -772,7 +774,6 @@ int MLFQ_time()
     if(quantumLefts[curr_id] == 0)
     {
         dequeue(&qs[lvl]);
-        // printf("lvl: /(%d)/ ^_^ \n",  (lvl+1  > 3 )? lvl: lvl+1);
         enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], curr_id);
         memory[curr_id].priority > 3 ? 4 : memory[curr_id].priority++;
         quantumLefts[curr_id] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
@@ -834,12 +835,14 @@ void dump_state_to_json(const char *filename) {
     
 
     // qs array
-    fprintf(f, "  \"qs\": [\n");
+    fprintf(f, "  \"qs\": {\n");
     for (int i = 0; i < 4; ++i) {
-        print_queue(f, "", &qs[i]);
+        char buffer[50]; // Allocate enough space
+        sprintf(buffer, "level%d", i+1);
+        print_queue(f, buffer, &qs[i]);
         if (i < 3) fprintf(f, ",\n"); else fprintf(f, "\n");
     }
-    fprintf(f, "  ],\n");
+    fprintf(f, "  },\n");
 
     // quantumLefts
     fprintf(f, "  \"quantumLefts\": [%d, %d, %d],\n",
@@ -859,7 +862,14 @@ void dump_state_to_json(const char *filename) {
         // code lines
         fprintf(f, "      \"code\": [");
         for (int j = 0; j < 11; ++j) {
-            fprintf(f, "\"%s\"", p->code[j]);
+            char trimmed[100]; // make sure it's big enough
+
+            size_t len = strlen(p->code[j]);
+            if (len > 0) {
+                strncpy(trimmed, p->code[j], len - 1); // copy all but last char
+                trimmed[len - 1] = '\0';             // manually null-terminate
+            }
+            fprintf(f, "\"%s\"", trimmed);
             if (j < 10) fprintf(f, ", ");
         }
         fprintf(f, "],\n");
@@ -893,32 +903,32 @@ void dump_state_to_json(const char *filename) {
 
 
 
-int main()
-{
+int main(int argc, char *argv[]) {
+    // Check if enough arguments are provided
+    if (argc != 9) {
+        printf("Usage: %s <sched_code> <arrival1> <arrival2> <arrival3> <quantum> <path1> <path2> <path3>\n", argv[0]);
+        return 1; // Return with error code
+    }
+    char program1 [12][100];
+    char program2 [12][100];
+    char program3 [12][100];
+
+    // Parse arguments from the command line
+    sched_code = atoi(argv[1]);   // Convert the argument to int
+    int arrival1 = atoi(argv[2]);
+    int arrival2 = atoi(argv[3]);
+    int arrival3 = atoi(argv[4]);
+    quantum = atoi(argv[5]);
+    readProgram(argv[6], program1);
+    readProgram(argv[7], program2);
+    readProgram(argv[8], program3);
+
     int (*schedulers[])() = { FIFO_time, RR_time, MLFQ_time };
     int (*notDone[])() = { notEmptyReadyQ, notEmptyReadyQ, isMLFQFull };
-    int arrival1 = 0;
-    int arrival2 = 0;
-    int arrival3 = 0;
-    printf("please enter sched code 0/1/2 \n");
-    scanf("%d", &sched_code);
-    
-    printf("please enter desired quantum time good sir: ");
-    scanf("%d", &quantum);
-    printf("please enter arrival time for process 1: ");
-    scanf("%d", &arrival1);
-    printf("please enter arrival time for process 2: ");
-    scanf("%d", &arrival2);
-    printf("please enter arrival time for process 3: ");
-    scanf("%d", &arrival3);
-
 
 
 
     quantumLeft = quantum;
-    char program1 [12][100];
-    char program2 [12][100];
-    char program3 [12][100];
     initializeQueue(&readyQ);
     initializeQueue(&qs[0]);
     initializeQueue(&qs[1]);
@@ -927,26 +937,19 @@ int main()
     
 
     
-    readProgram("Program_4.txt", program1);
-    readProgram("Program_5.txt", program2);
-    readProgram("Program_6.txt", program3);
     
     
-    
-
 
     for(int i = 0; i < 3; i++)
     {
         quantumLefts[i] = 1;
     }
     int maxArrival = 0;
-    // for(int i = 0 ; i < 3; i++)
-    // {
-    //     if(arrivals[i] > maxArrival)
-    //     {
-    //         maxArrival = arrivals[i];
-    //     }
-    // }
+
+    maxArrival = (arrival1 >= arrival2) 
+             ? ((arrival1 >= arrival3) ? arrival1 : arrival3)
+             : ((arrival2 >= arrival3) ? arrival2 : arrival3);
+             
 
     int x = 1;
     while(notDone[sched_code]() == 1 || clock <= maxArrival)
@@ -955,10 +958,7 @@ int main()
             return 0;
         }
         
-        printf("arrival[1]: %d \n",arrival1);
-        printf("arrival[2]: %d \n",arrival2);
-        printf("arrival[3]: %d \n",arrival3);
-        
+
         if(clock == arrival1){
             printf("Process (%d) arrived!\n", id);
             enqueue(&qs[0], id);
@@ -982,36 +982,39 @@ int main()
         // printQueue(&readyQ);
         // printf("Q state: %d \n",isEmpty(&readyQ));
         // printf("Code counts 2:  %d \n", codeCounts[0]);
-        dump_state_to_json("dumpster.txt");
+        // dump_state_to_json("dumpster.txt");
         // printf("sched code: %d \n", sched_code);
         executeNextLine(schedulers[sched_code]());
+        dump_state_to_json("dumpster.txt");
+        fflush(stdout);
         while(!scanf("%d", &x));
         clock++;
         
         // printf("2's pc:%d \n", memory[0].pc);
     }
+    
 
     
-    for (int i = 0; i < 3; i++) {
-        struct Process p = memory[i];
-        printf("----- Process Information -----\n");
-        printf("PID: %d\n", p.pid);
-        printf("State: %s\n", p.state);
-        printf("Priority: %d\n", p.priority);
-        printf("Program Counter (PC): %d\n", p.pc);
-        printf("Memory Bounds: [%d - %d]\n", p.lowerBound, p.upperBound);
+    // for (int i = 0; i < 3; i++) {
+    //     struct Process p = memory[i];
+    //     printf("----- Process Information -----\n");
+    //     printf("PID: %d\n", p.pid);
+    //     printf("State: %s\n", p.state);
+    //     printf("Priority: %d\n", p.priority);
+    //     printf("Program Counter (PC): %d\n", p.pc);
+    //     printf("Memory Bounds: [%d - %d]\n", p.lowerBound, p.upperBound);
         
-        printf("\nVariables (%d):\n", varCounts[p.pid]);
-        for (int i = 0; i < varCounts[p.pid]; i++) {
-            printf("  Var[%d]: %s\n", i, p.vars[i]);
-        }
+    //     printf("\nVariables (%d):\n", varCounts[p.pid]);
+    //     for (int i = 0; i < varCounts[p.pid]; i++) {
+    //         printf("  Var[%d]: %s\n", i, p.vars[i]);
+    //     }
 
-        printf("\nCode (%d lines):\n", codeCounts[p.pid]);
-        for (int i = 0; i < codeCounts[p.pid]; i++) {
-            printf("  [%d]: %s\n", i, p.code[i]);
-        }
-        printf("--------------------------------\n");
-    }
+    //     printf("\nCode (%d lines):\n", codeCounts[p.pid]);
+    //     for (int i = 0; i < codeCounts[p.pid]; i++) {
+    //         printf("  [%d]: %s\n", i, p.code[i]);
+    //     }
+    //     printf("--------------------------------\n");
+    // }
 
 
     return 0;
