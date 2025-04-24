@@ -1,53 +1,53 @@
 {
   "id": 3,
-  "userInputLock": 1,
+  "userInputLock": 0,
   "fileLock": 0,
   "userOutputLock": 0,
   "quantum": 1,
   "sched_code": 2,
   "qs": {
   "level1": [],
-  "level2": [0],
+  "level2": [],
   "level3": [],
   "level4": []
   },
-  "quantumLefts": [1, 1, 1],
+  "quantumLefts": [0, -3, 7],
   "memory": [
     {
       "pid": 0,
       "state": "Ready",
-      "priority": 2,
-      "pc": 2,
+      "priority": 3,
+      "pc": 7,
       "lowerBound": 0,
       "upperBound": 15,
-      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait userOutput", "printFromTo a b", "semSignal userOutpu", "semSignal userOutpu", "", "", ""],
-      "vars": ["a : 1", "var2 : ", "var3 : "]
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait userOutput", "printFromTo a b", "semSignal userOutput", "", "", "", ""],
+      "vars": ["a : 2", "b : 20", "var3 : "]
     },
     {
       "pid": 1,
-      "state": "Blocked",
-      "priority": 1,
-      "pc": 1,
+      "state": "Ready",
+      "priority": 2,
+      "pc": 7,
       "lowerBound": 16,
       "upperBound": 31,
-      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait file", "writeFile a b", "semSignal fil", "semSignal fil", "", "", ""],
-      "vars": ["var1 : ", "var2 : ", "var3 : "]
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait file", "writeFile a b", "semSignal file", "", "", "", ""],
+      "vars": ["a : oo", "b : ooooo", "var3 : "]
     },
     {
       "pid": 2,
-      "state": "Blocked",
-      "priority": 1,
-      "pc": 1,
+      "state": "Ready",
+      "priority": 4,
+      "pc": 9,
       "lowerBound": 32,
       "upperBound": 49,
-      "code": ["semWait userInput", "assign a input", "semSignal userInput", "semWait file", "assign b readFile a", "semSignal file", "semWait userOutput", "print b", "semSignal userOutpu", "semSignal userOutpu", "semSignal userOutpu"],
-      "vars": ["var1 : ", "var2 : ", "var3 : "]
+      "code": ["semWait userInput", "assign a input", "semSignal userInput", "semWait file", "assign b readFile a", "semSignal file", "semWait userOutput", "print b", "semSignal userOutput", "", ""],
+      "vars": ["a : 15", "b : efef", "var3 : "]
     }
   ],
   "blockedFileQ": [],
-  "blockedInputQ": [1, 2],
+  "blockedInputQ": [],
   "blockedOutputQ": [],
   "blockedGeneralQ": [1, 2],
   "readyQ": [0, 1, 2],
-  "clock": 4
+  "clock": 26
 }

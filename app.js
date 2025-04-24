@@ -2,7 +2,6 @@ const { spawn } = require('child_process');
 const readline = require('readline');
 const fs = require('fs');
 const child = spawn('./a.out', ['2', '1', '1', '1', '1', 'Program_1.txt', 'Program_2.txt', 'Program_3.txt']);
-// const child = spawn('./a.out');
 let programState;
 
 
@@ -11,32 +10,37 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-
+let flag = true;
 child.stdout.on('data', (data) => {
-    console.log(`[C Output]: ${data.toString().trim()}`);
-
+    flag = true;
+    console.log("OUTPUT DETECTEDDDD");
+    
+    console.log(data.toString().trim());
     if (data.toString().trim().split(" ")[0] == "Please"){
         rl.on('line', (input) => {
-            console.log(`You typed: ${input}`);
-            child.stdin.write(input + '\n');
+            
+            if(flag && data.toString().length != 0){
+                child.stdin.write(input + '\n');
+            }
+            flag = false;
           });
     }
   });
 
 rl.on("line",(data) => { // next cycle button (stop button is same but will write 2 instead)
-    console.log(`length: ${data.toString().length}`)
     if (data.toString().length == 0){
         child.stdin.write('1' + '\n');
-        fs.readFile('dumpster.txt', 'utf8', (err, data) => {
-            if (err) {
-                console.error('Error reading file:', err);
-                return;
-            }
-            programState = JSON.parse(data);
-        });
+        setTimeout(() => {
+            fs.readFile('dumpster.txt', 'utf8', (err, file) => {
+                if (err) {
+                    console.error('Error reading file:', err);
+                    return;
+                }
+                const cleaned = file.replace(/[\u0000-\u001F]/g, '');
+                programState = JSON.parse(cleaned);
+            });
+        }, 200); 
     }
- 
-    
 });
 
 
@@ -54,3 +58,7 @@ child.on('close', (code) => {
 });
 
 
+// fs.close(data, (err) => {
+//     if (err) throw err;
+//     console.log('File closed successfully.');
+//   });

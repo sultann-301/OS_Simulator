@@ -226,6 +226,42 @@ struct Line {
     char op2[100];
 };
 
+void trim(char *str) {
+    char *start = str;
+    char *end;
+
+    // Move start forward past leading whitespace
+    while (isspace((unsigned char)*start)) {
+        start++;
+    }
+ 
+    // If the string is all spaces
+    if (*start == 0) {
+        str[0] = '\0';
+        return;
+    }
+
+    // Move end to the last non-whitespace character
+    end = start + strlen(start) - 1;
+    while (end > start && isspace((unsigned char)*end)) {
+        end--;
+    }
+
+    // Null-terminate the trimmed string
+    *(end + 1) = '\0';
+
+    // Move the trimmed string to the beginning
+    memmove(str, start, end - start + 2); // +1 for '\0', +1 for offset
+    char *src = str, *dst = str;
+    while (*src) {
+        if (*src != '\n') {
+            *dst++ = *src;
+        }
+        src++;
+    }
+    *dst = '\0';  // null-terminate the result
+}
+
 char* getVariableValue(const char* key, char vars[3][50]) {
     size_t key_len = strlen(key);
     for (int i = 0; i < 3; i++) {
@@ -352,9 +388,14 @@ void storeProgram(char program[12][100]){
     codeCounts[id] = countLines(program);
     varCounts[id] = 0;
     
-
-    for (int i = 0; i < countLines(program); i++){
+    int i;
+    for (i = 0; i < countLines(program); i++){
         sprintf(p.code[i], "%s", program[i]);
+        trim(p.code[i]);
+    }
+    while( i < 11){
+        strcpy(p.code[i], "");
+        i++;
     }
     lastWord = lastWord + 6 + countLines(program);
     sprintf(p.vars[0], "var1 : ");
@@ -365,33 +406,6 @@ void storeProgram(char program[12][100]){
     id++;
 }
 
-void trim(char *str) {
-    char *start = str;
-    char *end;
-
-    // Move start forward past leading whitespace
-    while (isspace((unsigned char)*start)) {
-        start++;
-    }
- 
-    // If the string is all spaces
-    if (*start == 0) {
-        str[0] = '\0';
-        return;
-    }
-
-    // Move end to the last non-whitespace character
-    end = start + strlen(start) - 1;
-    while (end > start && isspace((unsigned char)*end)) {
-        end--;
-    }
-
-    // Null-terminate the trimmed string
-    *(end + 1) = '\0';
-
-    // Move the trimmed string to the beginning
-    memmove(str, start, end - start + 2); // +1 for '\0', +1 for offset
-}
 
 
 struct Line parse(char line[100]){
@@ -496,6 +510,7 @@ void execute(char line[100], struct Process *p){
         }
         if (strcmp(l.op2, "input") == 0){
             printf("Please enter a value\n");
+            fflush(stdout);
             scanf("%s", input);
         }
         
@@ -862,14 +877,14 @@ void dump_state_to_json(const char *filename) {
         // code lines
         fprintf(f, "      \"code\": [");
         for (int j = 0; j < 11; ++j) {
-            char trimmed[100]; // make sure it's big enough
+            // char trimmed[100]; // make sure it's big enough
 
-            size_t len = strlen(p->code[j]);
-            if (len > 0) {
-                strncpy(trimmed, p->code[j], len - 1); // copy all but last char
-                trimmed[len - 1] = '\0';             // manually null-terminate
-            }
-            fprintf(f, "\"%s\"", trimmed);
+            // size_t len = strlen(p->code[j]);
+            // if (len > 0) {
+            //     strncpy(trimmed, p->code[j], len - 1); // copy all but last char
+            //     trimmed[len - 1] = '\0';             // manually null-terminate
+            // }
+            fprintf(f, "\"%s\"", p->code[j]);
             if (j < 10) fprintf(f, ", ");
         }
         fprintf(f, "],\n");
