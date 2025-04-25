@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
+import program from './logic/dumpster.txt?raw';
 
 interface FormData {
   sched_code: string;
@@ -58,7 +59,7 @@ const FormComponent: React.FC = () => {
     clock: number;
   }
   
-  const [progState, setProgState] = useState<ProgState>({
+  const [programState, setProgramState] = useState<ProgState>({
     id: 0,
     userInputLock: 0,
     fileLock: 0,
@@ -78,9 +79,16 @@ const FormComponent: React.FC = () => {
 
   const [output, setOutput] = useState<string>('');
   const [input, setInput] = useState<string>('');
+  
 
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+
+  const [progState, setProgState] = useState<ProgState>(() => JSON.parse(program) as ProgState);
+
+  useEffect(() => {
+    setProgState(JSON.parse(program) as ProgState);
+  }, [program]);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +102,7 @@ const FormComponent: React.FC = () => {
   const handleInputChange = (e : React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
-
+  let exited = false;
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,10 +117,13 @@ const FormComponent: React.FC = () => {
       });
     
       const json = await response.json();
-      console.log(json);
       const { stdout, data } = json;
-      setProgState(data);
+      // setProgState(data);
+      
       setOutput(stdout)
+      console.log("i just set outputt ongg too " + stdout)
+      console.log("output is " + output)
+      exited = true;
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch (error) {
@@ -122,6 +133,7 @@ const FormComponent: React.FC = () => {
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(output)
 
     try {
       const response = await fetch('http://localhost:3000/simulate', {
@@ -132,14 +144,11 @@ const FormComponent: React.FC = () => {
       });
       // console.log(await response.json())
       const json = await response.json();
-      console.log(json);
+
       const { stdout, data } = json;
-      console.log(stdout);
-      console.log(data);
-      
-      
-      setProgState(data);
-      setOutput(stdout)
+
+      // setProgState(data);
+      if (!exited) setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch (error) {
@@ -161,14 +170,13 @@ const FormComponent: React.FC = () => {
         body: JSON.stringify({ input: input }),
       });
       const json = await response.json();
-      console.log(json);
+
       const { stdout, data } = json;
-      console.log(stdout);
-      console.log(data);
+
       
       
-      setProgState(data);
-      setOutput(stdout)
+      // setProgState(data);
+      if (!exited) setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch (error) {
@@ -271,6 +279,7 @@ const FormComponent: React.FC = () => {
       <div>
         <div style={{ whiteSpace: 'pre-line' }}>
           {output}
+          {progState.memory.every(proc => proc.state === "Terminated") && ("Its finished now...you can go home")}
           {output.includes("Please") && (
             <form onSubmit={handleInputNext}>
               <label>
@@ -307,8 +316,8 @@ const FormComponent: React.FC = () => {
   ))}
 
   <h3>Memory</h3>
-  {progState.memory.map(proc => (
-    <div key={proc.pid} style={{ border: '1px solid #ccc', margin: '8px 0', padding: '8px' }}>
+  {progState.memory.map((proc, index) => (
+    <div key={index} style={{ border: '1px solid #ccc', margin: '8px 0', padding: '8px' }}>
       <p><strong>PID:</strong> {proc.pid}</p>
       <p><strong>State:</strong> {proc.state}</p>
       <p><strong>Priority:</strong> {proc.priority}</p>

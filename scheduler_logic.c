@@ -704,14 +704,10 @@ void executeNextLine(int id){
         // printf("Process (%d) is executing this line (%s) \n", id,memory[id].code[memory[id].pc]);
         execute(memory[id].code[memory[id].pc], &memory[id]);
         memory[id].pc++;
-    }
-    else{
-        if(id != -1)
-        {
+        if (memory[id].pc == codeCounts[id]) {
             printf("PROCESS (%d) FINISHED EXECUTION !!!\n", id);
+            strcpy(memory[id].state, "Terminated");
         }
-        
-        // idk what to do when finish
     }
 }
 

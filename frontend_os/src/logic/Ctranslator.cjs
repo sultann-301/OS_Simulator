@@ -71,8 +71,9 @@ app.post('/spawn', (req, res) => {
   });
   child.on('close', (code) => {
     console.log("im boutaa pull out")
-    res.send({stdout: `child process exited with code ${code}`, data :programState});
+    res.send({stdout: ``, data :programState});
     childExited = true
+    console.log("child has been executed")
     child.kill();
     
   });
@@ -92,7 +93,7 @@ app.post('/input', (req, res) => {
 let output = "";
 app.post('/simulate', (req, res) => {
   if (childExited){
-
+    res.send({stdout: ``, data :programState});
     return
   }
   let flag1 = true;
@@ -103,7 +104,6 @@ app.post('/simulate', (req, res) => {
   let dadata = ""
   
   child.stdout.on('data', (data) => {
-    console.log("i have penetrated the childstdout")
       dadata = data.toString().trim()
       if (flag1 && !input){
         console.log(data.toString().trim())
