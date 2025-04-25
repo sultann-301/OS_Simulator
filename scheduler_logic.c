@@ -737,7 +737,6 @@ int RR_time()
 {
 
     int curr_id = peek(&readyQ);
-    printf("%d >= %d??\n",memory[curr_id].pc ,codeCounts[curr_id]);
     if(memory[curr_id].pc >= codeCounts[curr_id])
     {
         //process done

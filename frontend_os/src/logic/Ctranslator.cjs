@@ -3,6 +3,7 @@ const readline = require('readline');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
+const { log } = require('console');
 // import spawn from 'child_process';
 // import readline from 'readline';
 // import fs from 'fs'; 
@@ -57,47 +58,80 @@ const rl = readline.createInterface({
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+let childExited = false;
 
 // Define a GET route
 app.post('/spawn', (req, res) => {
   console.log("HELLO")
   console.log(Object.values(req.body));
   child = spawn('./a.out', Object.values(req.body));
+  childExited = false;
   child.stderr.on('data', (data) => {
     console.error(`[C Error]: ${data}`);
   });
-
-  
   child.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
-    process.exit();
+    console.log("im boutaa pull out")
+    res.send({stdout: `child process exited with code ${code}`, data :programState});
+    childExited = true
+    child.kill();
+    
   });
   
-  
 
-  res.send('Program Done..?');
 });
 
-app.get('/simulate', (req, res) => {
-  let flag = true;
+
+app.post('/input', (req, res) => {
+  let input = req.body
+  if(data.toString().length != 0){
+    child.stdin.write(input + '\n');
+  }
+
+});
+
+let output = "";
+app.post('/simulate', (req, res) => {
+  if (childExited){
+
+    return
+  }
+  let flag1 = true;
+  let flag2 = true;
+
+  let input = req.body.input
+  console.log(input)
+  let dadata = ""
+  
   child.stdout.on('data', (data) => {
-      flag = true;
-      console.log("OUTPUT DETECTEDDDD");
-      
-      console.log(data.toString().trim());
-      if (data.toString().trim().split(" ")[0] == "Please"){
-          rl.on('line', (input) => {
-              
-              if(flag && data.toString().length != 0){
-                  child.stdin.write(input + '\n');
-                
-              }
-              flag = false;
-            });
+    console.log("i have penetrated the childstdout")
+      dadata = data.toString().trim()
+      if (flag1 && !input){
+        console.log(data.toString().trim())
+        output += "OUTPUT DETECTEDDDD\n";
+
+        
+        output += data.toString().trim() + "\n";
+        flag1 = false;
       }
+      
     });
-      child.stdin.write('1' + '\n');
+
+      if (input){
+          
+        if(flag2){
+
+          console.log(`the input ${input} has been gobbled"`)
+          child.stdin.write(input + '\n');
+          flag2 = false;
+        }
+        
+            
+      }
+      if (!input) {
+        console.log("boutaa one all over")
+        child.stdin.write('1' + '\n');
+      }
+      
       setTimeout(() => {
           fs.readFile('dumpster.txt', 'utf8', (err, file) => {
               if (err) {
@@ -107,9 +141,12 @@ app.get('/simulate', (req, res) => {
               const cleaned = file.replace(/[\u0000-\u001F]/g, '');
               programState = JSON.parse(cleaned);
           });
+          
+          res.send({stdout: output, data : programState});
+          output = ""
       }, 200); 
-  
-  res.send(programState);
+     
+ 
 });
 
 // Set the port the app will listen on

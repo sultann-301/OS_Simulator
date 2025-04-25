@@ -76,6 +76,9 @@ const FormComponent: React.FC = () => {
     clock: 0,
   });
 
+  const [output, setOutput] = useState<string>('');
+  const [input, setInput] = useState<string>('');
+
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
 
@@ -86,6 +89,10 @@ const FormComponent: React.FC = () => {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleInputChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
   };
 
   // Handle form submit
@@ -100,8 +107,12 @@ const FormComponent: React.FC = () => {
         },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
+    
+      const json = await response.json();
+      console.log(json);
+      const { stdout, data } = json;
+      setProgState(data);
+      setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch (error) {
@@ -114,15 +125,51 @@ const FormComponent: React.FC = () => {
 
     try {
       const response = await fetch('http://localhost:3000/simulate', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
-      const data = await response.json();
+      // console.log(await response.json())
+      const json = await response.json();
+      console.log(json);
+      const { stdout, data } = json;
+      console.log(stdout);
+      console.log(data);
+      
+      
       setProgState(data);
-      console.log({progState});
+      setOutput(stdout)
+      
+      setMessage(data.message); // Assuming the server sends a response with a message
+    } catch (error) {
+      setError('Failed to submit the form');
+    }
+  };
+
+
+  const handleInputNext = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("IM BOUTA POSTT")
+
+    try {
+      const response = await fetch('http://localhost:3000/simulate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ input: input }),
+      });
+      const json = await response.json();
+      console.log(json);
+      const { stdout, data } = json;
+      console.log(stdout);
+      console.log(data);
+      
+      
+      setProgState(data);
+      setOutput(stdout)
+      
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch (error) {
       setError('Failed to submit the form');
@@ -222,6 +269,25 @@ const FormComponent: React.FC = () => {
 
       </form>
       <div>
+        <div style={{ whiteSpace: 'pre-line' }}>
+          {output}
+          {output.includes("Please") && (
+            <form onSubmit={handleInputNext}>
+              <label>
+                Input: <input
+                  type="text"
+                  id="input"
+                  name="input"
+                  value={input}
+                  onChange={handleInputChange}
+                />
+              </label>
+              <button type="submit">Submit</button>
+            </form>
+          )}
+          
+        </div>
+
       <div>
   <h2>Program State</h2>
   <p>ID: {progState.id}</p>
