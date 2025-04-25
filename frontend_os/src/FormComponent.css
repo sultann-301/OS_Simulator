@@ -1,0 +1,339 @@
+:root {
+    --primary: #2c3e50;
+    --accent: #3498db;
+    --bg: #f4f6f8;
+    --light: #ffffff;
+    --border: #dcdde1;
+    --text: #2f3640;
+    --muted: #7f8c8d;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .main-sections {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  
+  .form-section,
+  .state-section {
+    flex: 1;
+    padding: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  
+  
+  h1, h2, h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+  
+  form {
+    margin-bottom: 2rem;
+  }
+  
+  form > div {
+    margin-bottom: 1.5rem;
+  }
+  
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--primary);
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+  
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  
+  button {
+    padding: 0.7rem 1.5rem;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #2980b9;
+  }
+  
+  .output-box {
+    white-space: pre-line;
+    background-color: #ecf0f1;
+    padding: 1.5rem;
+    border-radius: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 2rem;
+    border-left: 5px solid var(--accent);
+  }
+  
+  .memory-box {
+    background-color: #fafafa;
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease;
+  }
+  
+  .memory-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+  
+  .queue-group {
+    margin-top: 1rem;
+  }
+  
+  .queue-group strong {
+    display: inline-block;
+    width: 100px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  
+  p {
+    margin: 0.3rem 0;
+  }
+  
+  .message, .error {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 1rem 0;
+  }
+  
+  .message {
+    background-color: #e9f7ef;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+  }
+  
+  .error {
+    background-color: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5b7b1;
+  }
+
+
+
+
+  .program-state {
+    margin-top: 2rem;
+    background-color: #fefefe;
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+  
+  .program-state h2 {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.5rem;
+  }
+  
+  .state-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 0.8rem;
+    column-gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .state-row p {
+    margin: 0;
+    font-weight: 500;
+  }
+  
+  .queue-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .queue-group strong {
+    display: inline-block;
+    width: 110px;
+    color: var(--primary);
+  }
+  
+  .memory-section {
+    margin-top: 1.5rem;
+  }
+  
+  .memory-box {
+    background-color: #fdfdfd;
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  
+  .memory-box p {
+    margin: 0.3rem 0;
+    font-size: 0.95rem;
+  }
+  
+  .memory-box strong {
+    color: var(--accent);
+  }
+
+  .clock-highlight {
+    display: inline-block;
+    background-color: #2e86de;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    margin-top: 0.5rem;
+  }
+
+
+  @keyframes pulseClock {
+    0% {
+      transform: scale(1);
+      background-color: #2e86de;
+    }
+    50% {
+      transform: scale(1.1);
+      background-color: #1e70c9;
+    }
+    100% {
+      transform: scale(1);
+      background-color: #2e86de;
+    }
+  }
+  
+  .clock-highlight {
+    display: inline-block;
+    background-color: #2e86de;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    margin-top: 0.5rem;
+    animation: pulseClock 0.6s ease-in-out;
+  }
+  
+  .console-output {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+    border: 1px solid #333;
+  }
+
+
+  /* Style the queues section */
+.queues-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+  }
+  
+  /* Style each individual queue */
+  .queue {
+    flex: 1;
+    padding: 20px;
+    background: #f4f4f9;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Queue title styling */
+  .queue h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  /* Queue item styling */
+  .queue-item {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .queue-item:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Special styling for empty queues */
+  .queue.empty {
+    background-color: #f0f0f0;
+    color: #777;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .queue.empty p {
+    font-style: italic;
+  }
+  
+  
+  
+  
+  
