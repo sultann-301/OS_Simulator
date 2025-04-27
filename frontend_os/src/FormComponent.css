@@ -12,7 +12,7 @@
 
 .main-sections {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 31% 31% 31%;
   gap: 2rem;
 }
 
@@ -295,3 +295,6 @@ select:focus {
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+form button{
+  margin: 4px;
+}

@@ -105,8 +105,6 @@ const FormComponent: React.FC = () => {
 
   const handleChange2 = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    let code = value == "FIFO" ? 0 : value == "RR" ? 1 : 2
-    console.log(value)
     setFormData({
       ...formData,
       [name]: value,
@@ -135,7 +133,7 @@ const FormComponent: React.FC = () => {
           path3: '',
         })
         setOutput("Killed child")
-        const response = await fetch('http://localhost:3000/kill', {
+        await fetch('http://localhost:3000/kill', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -148,28 +146,23 @@ const FormComponent: React.FC = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({formData, mode : button.name == 'steps' ? '1' : '2'}),
         });
       
-      
-        const json = await response.json();
-        const { stdout, data } = json;
-        // setProgState(data);
+          const json = await response.json();
+          const { stdout } = json;
+          setOutput(stdout)
+          exited = true;
+        }
         
-        setOutput(stdout)
-        console.log("i just set outputt ongg too " + stdout)
-        console.log("output is " + output)
-        exited = true;
-      }
+      
       
     } catch (e) {
-      console.log(e);
     }
   };
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(output)
 
     try {
       const response = await fetch('http://localhost:3000/simulate', {
@@ -178,18 +171,59 @@ const FormComponent: React.FC = () => {
           'Content-Type': 'application/json',
         },
       });
-      // console.log(await response.json())
       const json = await response.json();
 
       const { stdout, data } = json;
 
-      // setProgState(data);
       if (!exited) setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch {
     }
   };
+
+
+
+  const handleAuto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    let interval;
+    try {
+
+      
+        await fetch('http://localhost:3000/spawn', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({formData, mode : 2}),
+          });
+          console.log("im in the auto");
+      
+          // const json = await response.json();
+          // const { stdout, data } = json;
+          // setOutput(stdout)
+          exited = true;
+      console.log("im in button");
+              
+      interval = setInterval(async () => {
+        const response = await fetch('http://localhost:3000/getoutput', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const json = await response.json();
+        const {stdout} = json;
+        setOutput(stdout)
+        
+      }, 500); // 1000ms = 1 second
+
+    } 
+    catch (e) {
+      clearInterval(interval);
+    }
+  };
+
 
 
   const handleInputNext = async (e: React.FormEvent) => {
@@ -235,44 +269,48 @@ const FormComponent: React.FC = () => {
                 <option value={2}>MLFQ</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="arrival1">Arrival Time 1:</label>
-              <input type="text" id="arrival1" name="arrival1" value={formData.arrival1} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="arrival2">Arrival Time 2:</label>
-              <input type="text" id="arrival2" name="arrival2" value={formData.arrival2} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="arrival3">Arrival Time 3:</label>
-              <input type="text" id="arrival3" name="arrival3" value={formData.arrival3} onChange={handleChange} />
-            </div>
-            <div>
+            {formData.sched_code == '1' && (<div>
               <label htmlFor="quantum">Quantum (RR):</label>
               <input type="text" id="quantum" name="quantum" value={formData.quantum} onChange={handleChange} />
-            </div>
+            </div>)}
+            <div>
             <div>
               <label htmlFor="path1">Program 1 Name:</label>
               <input type="text" id="path1" name="path1" value={formData.path1} onChange={handleChange} />
             </div>
+              <label htmlFor="arrival1">Arrival Time 1:</label>
+              <input type="text" id="arrival1" name="arrival1" value={formData.arrival1} onChange={handleChange} placeholder='0 if not specified' />
+            </div>
+            <div>
             <div>
               <label htmlFor="path2">Program 2 Name:</label>
               <input type="text" id="path2" name="path2" value={formData.path2} onChange={handleChange} />
+            </div>
+              <label htmlFor="arrival2">Arrival Time 2:</label>
+              <input type="text" id="arrival2" name="arrival2" value={formData.arrival2} onChange={handleChange} placeholder='0 if not specified'/>
             </div>
             <div>
               <label htmlFor="path3">Program 3 Name:</label>
               <input type="text" id="path3" name="path3" value={formData.path3} onChange={handleChange} />
             </div>
-            <button name = "submit" type="submit">Submit</button>
+            <div>
+              <label htmlFor="arrival3">Arrival Time 3:</label>
+              <input type="text" id="arrival3" name="arrival3" value={formData.arrival3} onChange={handleChange} placeholder='0 if not specified'/>
+            </div>
+
+            <button name = "steps" type="submit">Start step by step</button>
+            
             <button name = "reset" type="submit">Reset</button>
           </form>
-  
-          {message && <p>{message}</p>}
-          {error && <p>{error}</p>}
-  
+
           <form onSubmit={handleNext}>
             <button type="submit">NEXT</button>
           </form>
+
+          <form onSubmit={handleAuto}>
+            <button name = "continuous" type="submit">Start auto</button>
+          </form>
+  
   
           <div className="console-output" style={{ whiteSpace: 'pre-line' }}>
             {output}
@@ -362,9 +400,9 @@ const FormComponent: React.FC = () => {
 
             <div>
               <strong>Blocked General Q:{progState.blockedGeneralQ.map((num, idx) => (
-                  <span key={idx} className="queue-card">
-                    {num}
-                  </span>
+                  (num == 1 && <span key={idx} className="queue-card">
+                    {idx}
+                  </span>)
                 ))}
               </strong>
                 
@@ -378,10 +416,10 @@ const FormComponent: React.FC = () => {
                 ))}
               </strong>
             </div>
-                    </div>
+          </div>
               
-                  </div>
-                </div>
+        </div>
+      </div>
   );
   
 };

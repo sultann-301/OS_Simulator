@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -520,7 +521,7 @@ void execute(char line[100], struct Process *p){
             printf("Process (%d) : Please enter a value\n", p->pid);
             fflush(stdout);
             scanf("%s", input);
-             printf("Process (%d) : Assigned variable", p->pid);
+             printf("Process (%d) : Assigned variable\n", p->pid);
         }
         
         char seperator[] = " : ";
@@ -916,7 +917,7 @@ void dump_state_to_json(const char *filename) {
 
     // readyQ
     print_queue(f, "readyQ", &readyQ); fprintf(f, ",\n");
-    fprintf(f, "  \"blockedGeneralQ\": [%d, %d, %d]\n", blockedGeneralQ[0], blockedGeneralQ[1], blockedGeneralQ[2]);
+    fprintf(f, "  \"blockedGeneralQ\": [%d, %d, %d],\n", blockedGeneralQ[0], blockedGeneralQ[1], blockedGeneralQ[2]);
 
 
     // clock
@@ -931,8 +932,8 @@ void dump_state_to_json(const char *filename) {
 
 int main(int argc, char *argv[]) {
     // Check if enough arguments are provided
-    if (argc != 9) {
-        printf("Usage: %s <sched_code> <arrival1> <arrival2> <arrival3> <quantum> <path1> <path2> <path3>\n", argv[0]);
+    if (argc != 10) {
+        printf("Usage: %s <mode> <sched_code> <arrival1> <arrival2> <arrival3> <quantum> <path1> <path2> <path3>\n", argv[0]);
         return 1; // Return with error code
     }
     char program1 [12][100];
@@ -943,24 +944,25 @@ int main(int argc, char *argv[]) {
     int p3 = 0;
 
     // Parse arguments from the command line
-    sched_code = atoi(argv[1]);   // Convert the argument to int
-    int arrival1 = atoi(argv[2]);
-    int arrival2 = atoi(argv[3]);
-    int arrival3 = atoi(argv[4]);
-    quantum = atoi(argv[5]);
-    trim(argv[6]);
+    sched_code = atoi(argv[2]);   // Convert the argument to int
+    int arrival1 = atoi(argv[3]);
+    int arrival2 = atoi(argv[4]);
+    int arrival3 = atoi(argv[5]);
+    int mode = atoi(argv[1]);
+    quantum = atoi(argv[6]);
     trim(argv[7]);
     trim(argv[8]);
-    if (strcmp(argv[6], "$") != 0) {
-        readProgram(argv[6], program1);
+    trim(argv[9]);
+    if (strcmp(argv[7], "$") != 0) {
+        readProgram(argv[7], program1);
         p1 = 1;
     }
-    if (strcmp(argv[7], "$") != 0) {
-        readProgram(argv[7], program2);
+    if (strcmp(argv[8], "$") != 0) {
+        readProgram(argv[8], program2);
         p2 = 1;
     }
-    if (strcmp(argv[8], "$") != 0) {
-        readProgram(argv[8], program3);
+    if (strcmp(argv[9], "$") != 0) {
+        readProgram(argv[9], program3);
         p3 = 1;
     }
 
@@ -1030,7 +1032,12 @@ int main(int argc, char *argv[]) {
         executeNextLine(currProcess);
         dump_state_to_json("dumpster.txt");
         fflush(stdout);
-        while(!scanf("%d", &x));
+        if (mode == 1) {
+            while(!scanf("%d", &x));
+        }
+        else{
+            sleep(3);
+        }
         clock++;
 
     }

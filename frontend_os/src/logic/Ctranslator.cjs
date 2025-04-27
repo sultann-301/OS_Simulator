@@ -7,9 +7,10 @@ const { log } = require('console');
 
 
 
+
 let programState;
 let child;
-let listener;
+
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -93,22 +94,44 @@ let childExited = false;
 app.post('/spawn', (req, res) => {
   console.log("HELLO")
   console.log(Object.values(req.body));
-  child = spawn('./a.out', Object.values(req.body).map(value => value.trim() === "" ? "$" : value));
-  child.stdout.setMaxListeners(1);
+  const {formData, mode} = req.body
+  console.log(formData)
+  console.log(mode)
+  child = spawn('./a.out', [mode,...Object.values(formData).map(value => value.trim() === "" ? "$" : value)]);
+  if (child.stdout.listenerCount('data') === 0) {
+    child.stdout.on('data', (data) => {
+      output = ""
+      console.log(data.toString().trim())
+      output += "OUTPUT DETECTEDDDD\n";
+      output += data.toString().trim() + "\n";
+    });
+  }
   childExited = false;
   child.stderr.on('data', (data) => {
     console.error(`[C Error]: ${data}`);
   });
   child.on('close', (code) => {
-    res.send({stdout: code == 1 ? "ERROR FILE NOT FOUND":``, data :programState});
+    if (code == 1) res.send({stdout : "ERROR FILE NOT FOUND", data :programState});
     childExited = true
     empty_dumpster("dumpster.txt")
     child.kill();
-    
+    return;
   });
-  
-
+  setTimeout(() => {
+    if (!childExited) res.send('');
+  }, 1500);
 });
+
+
+app.post('/getoutput', (req, res) => {
+    if (childExited){
+      res.send({stdout: `PLEASE SUBMIT AGAIN MAN .. ITS OVER`, data :programState});
+      return
+    }
+    res.send({stdout : output});
+
+})
+
 
 
 app.post('/kill', (req, res) => {
@@ -119,17 +142,14 @@ app.post('/kill', (req, res) => {
   empty_dumpster("dumpster.txt")
   child.kill();
   childExited = true;
-
-
-
 })
+
 
 app.post('/input', (req, res) => {
   let input = req.body
   if(data.toString().length != 0){
     child.stdin.write(input + '\n');
   }
-
 });
 
 let output = "";
@@ -141,48 +161,33 @@ app.post('/simulate', (req, res) => {
   let flag = true;
 
   let input = req.body.input
-  
-  if (child.stdout.listenerCount('data') === 0) {
-    child.stdout.on('data', (data) => {
-        if (!input){
-          console.log(data.toString().trim())
-          output += "OUTPUT DETECTEDDDD\n";
-          output += data.toString().trim() + "\n";
-        }
-      });
-  }
 
-      if (input){
-          
-        if(flag){
-
-          console.log(`the input ${input} has been gobbled"`)
-          child.stdin.write(input + '\n');
-          flag = false;
-        }
-        
-            
-      }
-      if (!input) {
-        child.stdin.write('1' + '\n');
-      }
+  if (input){
       
-      setTimeout(() => {
-          fs.readFile('dumpster.txt', 'utf8', (err, file) => {
-              if (err) {
-                  console.error('Error reading file:', err);
-                  return;
-              }
-              const cleaned = file.replace(/[\u0000-\u001F]/g, '');
-              programState = JSON.parse(cleaned);
-          });
-          
-          res.send({stdout: output, data : programState});
-          output = ""
-      }, 200); 
-
-     
- 
+    if(flag){
+      child.stdin.write(input + '\n');
+      flag = false;
+    }
+    
+        
+  }
+  if (!input) {
+    child.stdin.write('1' + '\n');
+  }
+  
+  setTimeout(() => {
+      // fs.readFile('dumpster.txt', 'utf8', (err, file) => {
+      //     if (err) {
+      //         console.error('Error reading file:', err);
+      //         return;
+      //     }
+      //     const cleaned = file.replace(/[\u0000-\u001F]/g, '');
+      //     programState = JSON.parse(cleaned);
+      // });
+      
+      res.send({stdout: output, data : programState});
+      
+  }, 200);
 });
 
 // Set the port the app will listen on
