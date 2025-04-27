@@ -1,339 +1,297 @@
-:root {
-    --primary: #2c3e50;
-    --accent: #3498db;
-    --bg: #f4f6f8;
-    --light: #ffffff;
-    --border: #dcdde1;
-    --text: #2f3640;
-    --muted: #7f8c8d;
-    --shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text);
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
+/* FormComponent.css */
 
-  .main-sections {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-  }
-  
-  .form-section,
-  .state-section {
-    flex: 1;
-    padding: 1.5rem;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-  }
-  
-  
-  
-  h1, h2, h3 {
-    color: var(--primary);
-    margin-bottom: 1rem;
-  }
-  
-  form {
-    margin-bottom: 2rem;
-  }
-  
-  form > div {
-    margin-bottom: 1.5rem;
-  }
-  
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.4rem;
-    color: var(--primary);
-  }
-  
-  input[type="text"] {
-    width: 100%;
-    padding: 0.65rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.2s ease;
-  }
-  
-  input[type="text"]:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  
-  button {
-    padding: 0.7rem 1.5rem;
-    background-color: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #2980b9;
-  }
-  
-  .output-box {
-    white-space: pre-line;
-    background-color: #ecf0f1;
-    padding: 1.5rem;
-    border-radius: 10px;
-    font-family: 'Courier New', Courier, monospace;
-    margin-bottom: 2rem;
-    border-left: 5px solid var(--accent);
-  }
-  
-  .memory-box {
-    background-color: #fafafa;
-    padding: 1rem 1.2rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 1rem;
-    transition: transform 0.2s ease;
-  }
-  
-  .memory-box:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow);
-  }
-  
-  .queue-group {
-    margin-top: 1rem;
-  }
-  
-  .queue-group strong {
-    display: inline-block;
-    width: 100px;
-    font-weight: 600;
-    color: var(--primary);
-  }
-  
-  p {
-    margin: 0.3rem 0;
-  }
-  
-  .message, .error {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    margin: 1rem 0;
-  }
-  
-  .message {
-    background-color: #e9f7ef;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
-  }
-  
-  .error {
-    background-color: #fdecea;
-    color: #c0392b;
-    border: 1px solid #f5b7b1;
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background-color: #f9f9fb;
+  min-height: 100vh;
+  min-width: 100vw;
+}
 
+.main-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+}
 
+.form-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
 
+.form-section h2 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
+}
 
-  .program-state {
-    margin-top: 2rem;
-    background-color: #fefefe;
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-  }
-  
-  .program-state h2 {
-    font-size: 1.5rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--accent);
-    padding-bottom: 0.5rem;
-  }
-  
-  .state-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    row-gap: 0.8rem;
-    column-gap: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .state-row p {
-    margin: 0;
-    font-weight: 500;
-  }
-  
-  .queue-group {
-    margin-bottom: 1.2rem;
-  }
-  
-  .queue-group strong {
-    display: inline-block;
-    width: 110px;
-    color: var(--primary);
-  }
-  
-  .memory-section {
-    margin-top: 1.5rem;
-  }
-  
-  .memory-box {
-    background-color: #fdfdfd;
-    padding: 1rem 1.2rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  }
-  
-  .memory-box p {
-    margin: 0.3rem 0;
-    font-size: 0.95rem;
-  }
-  
-  .memory-box strong {
-    color: var(--accent);
-  }
+.form-section:hover {
+  transform: translateY(-5px);
+}
 
-  .clock-highlight {
-    display: inline-block;
-    background-color: #2e86de;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    margin-top: 0.5rem;
-  }
+form > div {
+  margin-bottom: 1rem;
+}
 
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
 
-  @keyframes pulseClock {
-    0% {
-      transform: scale(1);
-      background-color: #2e86de;
-    }
-    50% {
-      transform: scale(1.1);
-      background-color: #1e70c9;
-    }
-    100% {
-      transform: scale(1);
-      background-color: #2e86de;
-    }
-  }
-  
-  .clock-highlight {
-    display: inline-block;
-    background-color: #2e86de;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    margin-top: 0.5rem;
-    animation: pulseClock 0.6s ease-in-out;
-  }
-  
-  .console-output {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    font-family: 'Courier New', Courier, monospace;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-    height: 300px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
-    border: 1px solid #333;
-  }
+input[type="text"] {
+  width: 80%; /* Reduced width to prevent overflow */
+  padding: 0.6rem 1rem;
+  border: 2px solid #ccc;
+  border-radius: 0.5rem;
+  background-color: #fff; /* White background */
+  color: #7f5af0; /* Purple text color */
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
 
+input[type="text"]:focus {
+  border-color: #7f5af0;
+  background-color: #f0f0f0; /* Light grey background on focus */
+  outline: none;
+}
 
-  /* Style the queues section */
+button {
+  padding: 0.75rem 1.5rem;
+  background-color: #7f5af0;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background-color: #6246ea;
+  transform: scale(1.05);
+}
+
+.console-output {
+  background-color: #fff; /* White background */
+  color: #7f5af0; /* Purple text color */
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-top: 2rem;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.95rem;
+  min-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid #ccc; /* Lighter border */
+}
+
+.state-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+h2, h3 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
+}
+
+.clock-highlight {
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
 .queues-container {
-    display: flex;
-    gap: 30px;
-    margin-top: 20px;
-  }
-  
-  /* Style each individual queue */
-  .queue {
-    flex: 1;
-    padding: 20px;
-    background: #f4f4f9;
-    border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  /* Queue title styling */
-  .queue h3 {
-    color: #333;
-    margin-bottom: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  /* Queue item styling */
-  .queue-item {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 6px;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-  }
-  
-  .queue-item:hover {
-    transform: scale(1.05);
-  }
-  
-  /* Special styling for empty queues */
-  .queue.empty {
-    background-color: #f0f0f0;
-    color: #777;
-    text-align: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .queue.empty p {
-    font-style: italic;
-  }
-  
-  
-  
-  
-  
+  margin-bottom: 1rem;
+}
+
+.queues-container > div,
+.state-section > div {
+  margin-bottom: 1rem;
+}
+
+strong {
+  color: #333;
+}
+
+.process-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.process-card:hover {
+  transform: scale(1.02);
+}
+
+.queues-container div,
+.state-section div > strong + div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.queues-container div > strong,
+.state-section div > strong {
+  flex: 0 0 100%;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.queues-container div > span,
+.state-section div > span {
+  background-color: #d4d4fc;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+/* Fancy Queue Items */
+.queues-container span,
+.state-section span {
+  background: #eaeaff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  box-shadow: inset 0 0 4px rgba(127, 90, 240, 0.5);
+  font-size: 0.9rem;
+}
+
+/* General Messages */
+p {
+  color: #666;
+}
+
+/* Smooth scrolling inside output */
+.console-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-output::-webkit-scrollbar-thumb {
+  background-color: #7f5af0;
+  border-radius: 4px;
+}
+
+/* Memory Section */
+.memory-section {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.memory-section h2 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
+}
+
+.memory-section .process-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.memory-section .process-card:hover {
+  transform: scale(1.02);
+}
+
+.memory-section .process-card div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.memory-section .process-card p {
+  margin: 0;
+}
+
+.memory-section .process-card p strong {
+  color: #333;
+}
+
+.memory-section .process-card .process-info {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.memory-section .process-card .process-info div {
+  flex: 1 1 45%;
+}
+
+/* Queue Cards Layout */
+.state-section .queues-container span {
+  display: inline-block;
+  background-color: #d4d4fc;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 1rem;
+  margin: 0.25rem;
+  box-shadow: inset 0 0 4px rgba(127, 90, 240, 0.5);
+}
+
+.queues-container > div, .state-section > div {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 2px solid #ccc;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #5f4bb6;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+select:focus {
+  border-color: #7f5af0;
+  background-color: #f0f0ff;
+  outline: none;
+}
+
+.queue-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.queue-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+

@@ -59,6 +59,7 @@ const FormComponent: React.FC = () => {
     blockedGeneralQ: number[];
     readyQ: number[];
     clock: number;
+    currProcess: number;
   }
   
   const [programState, setProgramState] = useState<ProgState>({
@@ -77,6 +78,7 @@ const FormComponent: React.FC = () => {
     blockedGeneralQ: [],
     readyQ: [],
     clock: 0,
+    currProcess: 0
   });
 
   const [output, setOutput] = useState<string>('');
@@ -101,6 +103,16 @@ const FormComponent: React.FC = () => {
     });
   };
 
+  const handleChange2 = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    let code = value == "FIFO" ? 0 : value == "RR" ? 1 : 2
+    console.log(value)
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
   const handleInputChange = (e : React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
@@ -108,29 +120,50 @@ const FormComponent: React.FC = () => {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const nativeEven  = e.nativeEvent as SubmitEvent
+    const button = nativeEven.submitter as HTMLButtonElement
     try {
-      const response = await fetch('http://localhost:3000/spawn', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-    
-      const json = await response.json();
-      const { stdout, data } = json;
-      // setProgState(data);
+      if (button.name == "reset"){
+        setFormData({
+          sched_code: '',
+          arrival1: '',
+          arrival2: '',
+          arrival3: '',
+          quantum: '',
+          path1: '',
+          path2: '',
+          path3: '',
+        })
+        setOutput("Killed child")
+        const response = await fetch('http://localhost:3000/kill', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });  
+      }
+      else{
+        const response = await fetch('http://localhost:3000/spawn', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
       
-      setOutput(stdout)
-      console.log("i just set outputt ongg too " + stdout)
-      console.log("output is " + output)
-      exited = true;
       
-      setMessage(data.message); // Assuming the server sends a response with a message
+        const json = await response.json();
+        const { stdout, data } = json;
+        // setProgState(data);
+        
+        setOutput(stdout)
+        console.log("i just set outputt ongg too " + stdout)
+        console.log("output is " + output)
+        exited = true;
+      }
+      
     } catch (e) {
       console.log(e);
-      setError('Failed to submit the form');
     }
   };
 
@@ -155,7 +188,6 @@ const FormComponent: React.FC = () => {
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch {
-      setError('Failed to submit the form');
     }
   };
 
@@ -183,112 +215,175 @@ const FormComponent: React.FC = () => {
       
       setMessage(data.message); // Assuming the server sends a response with a message
     } catch  {
-      setError('Failed to submit the form');
     }
   };
 
-  return (<div className="container">
-    <div className="main-sections">
-      <div className="form-section">
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="sched_code">Scheduling Algorithm:</label>
-            <input type="text" id="sched_code" name="sched_code" value={formData.sched_code} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="arrival1">Arrival Time 1:</label>
-            <input type="text" id="arrival1" name="arrival1" value={formData.arrival1} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="arrival2">Arrival Time 2:</label>
-            <input type="text" id="arrival2" name="arrival2" value={formData.arrival2} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="arrival3">Arrival Time 3:</label>
-            <input type="text" id="arrival3" name="arrival3" value={formData.arrival3} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="quantum">Quantum (RR):</label>
-            <input type="text" id="quantum" name="quantum" value={formData.quantum} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="path1">Program 1 Name:</label>
-            <input type="text" id="path1" name="path1" value={formData.path1} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="path2">Program 2 Name:</label>
-            <input type="text" id="path2" name="path2" value={formData.path2} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="path3">Program 3 Name:</label>
-            <input type="text" id="path3" name="path3" value={formData.path3} onChange={handleChange} />
-          </div>
-          <button type="submit">Submit</button>
-        </form>
-
-        {message && <p>{message}</p>}
-        {error && <p>{error}</p>}
-
-        <form onSubmit={handleNext}>
-          <button type="submit">NEXT</button>
-        </form>
-
-        {output.includes("Please") && (
-          <form onSubmit={handleInputNext}>
-            <label>
-              Input:
-              <input type="text" id="input" name="input" value={input} onChange={handleInputChange} />
-            </label>
-            <button type="submit">Submit</button>
+  return (
+    <div className="container">
+      <div className="main-sections">
+        
+        {/* COLUMN 1: Form + Console */}
+        <div className="form-section">
+          <h2>Dashboard</h2>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="sched_code">Scheduling Algorithm:</label>
+              <select id="sched_code" name="sched_code" value={formData.sched_code} onChange={handleChange2}>
+                <option value="" disabled selected>Select Scheduling Algorithm</option>
+                <option value={0}>FIFO</option>
+                <option value={1}>RR</option>
+                <option value={2}>MLFQ</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="arrival1">Arrival Time 1:</label>
+              <input type="text" id="arrival1" name="arrival1" value={formData.arrival1} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="arrival2">Arrival Time 2:</label>
+              <input type="text" id="arrival2" name="arrival2" value={formData.arrival2} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="arrival3">Arrival Time 3:</label>
+              <input type="text" id="arrival3" name="arrival3" value={formData.arrival3} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="quantum">Quantum (RR):</label>
+              <input type="text" id="quantum" name="quantum" value={formData.quantum} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="path1">Program 1 Name:</label>
+              <input type="text" id="path1" name="path1" value={formData.path1} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="path2">Program 2 Name:</label>
+              <input type="text" id="path2" name="path2" value={formData.path2} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="path3">Program 3 Name:</label>
+              <input type="text" id="path3" name="path3" value={formData.path3} onChange={handleChange} />
+            </div>
+            <button name = "submit" type="submit">Submit</button>
+            <button name = "reset" type="submit">Reset</button>
           </form>
-        )}
-
-        <div className='console-output' style={{ whiteSpace: 'pre-line' }}>{output}</div>
-      </div>
-
-      <div className="state-section">
-        <h2>Program State</h2>
-        <p>Number Of Processes: {progState.id}</p>
-        <p>User Input Lock: {progState.userInputLock}</p>
-        <p>File Lock: {progState.fileLock}</p>
-        <p>User Output Lock: {progState.userOutputLock}</p>
-        <p>Quantum: {progState.quantum}</p>
-        <p>Schedule Code: {progState.sched_code}</p>
-        <p>Quantum Lefts: {progState.quantumLefts.join(', ')}</p>
-        <p>
-          Clock: <span className="clock-highlight">{progState.clock}</span>
-        </p>
-
-        <h3>Queues</h3>
-        <div className="queues-container"></div>
-        {Object.entries(progState.qs).map(([level, queue]) => (
-          <div key={level}>
-            <strong>{level}:</strong> {queue.join(', ')}
+  
+          {message && <p>{message}</p>}
+          {error && <p>{error}</p>}
+  
+          <form onSubmit={handleNext}>
+            <button type="submit">NEXT</button>
+          </form>
+  
+          <div className="console-output" style={{ whiteSpace: 'pre-line' }}>
+            {output}
+            {progState.memory.every(proc => proc.state === "Terminated") && ("Its finished now...you can go home")}
+            {output.includes("Please") && (
+              <form onSubmit={handleInputNext}>
+                <label>
+                  Input:
+                  <input type="text" id="input" name="input" value={input} onChange={handleInputChange} />
+                </label>
+                <button type="submit">Submit</button>
+              </form>
+            )}
           </div>
-        ))}
+        </div>
+  
+        {/* COLUMN 2: Memory Cards */}
+        <div className="memory-section">
+          <h2>Memory</h2>
+          {progState.memory.map((proc, index) => (
+            (proc.state != "" && (<div key={index} className="process-card">
+              <p><strong>PID:</strong> {proc.pid}</p>
+              <p><strong>State:</strong> {proc.state}</p>
+              <p><strong>Priority:</strong> {proc.priority}</p>
+              <p><strong>PC:</strong> {proc.pc}</p>
+              <p><strong>Bounds:</strong> {proc.lowerBound} - {proc.upperBound}</p>
+              <p><strong>Code:</strong> {proc.code.join(', ')}</p>
+              <p><strong>Vars:</strong> {proc.vars.join(', ')}</p>
+            </div>))
+          ))}
+        </div>
+  
+        {/* COLUMN 3: Program State */}
+        <div className="state-section">
+          <h2>Program State</h2>
+          <p>Number Of Processes: {progState.id}</p>
+          <p>Current process running: {progState.currProcess}</p>
+          <p>Current instruction running: {progState.currProcess != -1 ? progState.memory[progState.currProcess].code[progState.memory[progState.currProcess].pc] : 'None'}</p>
+          <p>User Input Lock Holder: {progState.userInputLock == -1 ? 'None' : 'Process ' + progState.userInputLock}</p>
+          <p>File Lock Holder: {progState.fileLock == -1 ? 'None' : 'Process ' + progState.fileLock}</p>
+          <p>User Output Lock Holder: {progState.userOutputLock == -1 ? 'None' : 'Process ' + progState.userOutputLock}</p>
+          <p>Quantum: {progState.quantum}</p>
+          <p>Scheduling Algorithm: {progState.sched_code == 0 ? 'FIFO' : progState.sched_code == 1 ? 'RR' : progState.sched_code == 2 ? 'MLFQ' : "N/A"}</p>
+          <p>
+            Clock: <span className="clock-highlight">{progState.clock}</span>
+          </p>
+  
+          <h3>Queues</h3>
+            {Object.entries(progState.qs).map(([level, queue] : [string, number[]]) => (
+              <div  key={level}>
+                <strong>{level}: {queue.map((num, idx) => (
+                    <span key={idx} className="queue-card">
+                      {num}
+                    </span>
+                  ))}</strong>
+                
+              </div>
+            ))}
 
-        <h3>Memory</h3>
-        {progState.memory.map((proc, index) => (
-          <div key={index} className="process-card">
-            <p><strong>PID:</strong> {proc.pid}</p>
-            <p><strong>State:</strong> {proc.state}</p>
-            <p><strong>Priority:</strong> {proc.priority}</p>
-            <p><strong>PC:</strong> {proc.pc}</p>
-            <p><strong>Bounds:</strong> {proc.lowerBound} - {proc.upperBound}</p>
-            <p><strong>Code:</strong> {proc.code.join(', ')}</p>
-            <p><strong>Vars:</strong> {proc.vars.join(', ')}</p>
-          </div>
-        ))}
+            <h3>Other Queues</h3>
+            <div>
+              <strong>Blocked File Q:{progState.blockedFileQ.map((num, idx) => (
+                  <span key={idx} className="queue-card">
+                    {num}
+                  </span>
+                ))}
+              </strong>
+            </div>
 
-        <h3>Other Queues</h3>
-        <p>Blocked File Q: {progState.blockedFileQ.join(', ')}</p>
-        <p>Blocked Input Q: {progState.blockedInputQ.join(', ')}</p>
-        <p>Blocked Output Q: {progState.blockedOutputQ.join(', ')}</p>
-        <p>Blocked General Q: {progState.blockedGeneralQ.join(', ')}</p>
-        <p>Ready Q: {progState.readyQ.join(', ')}</p>
-      </div>
-    </div>
-  </div>);
+            <div>
+              <strong>Blocked Input Q:{progState.blockedInputQ.map((num, idx) => (
+                  <span key={idx} className="queue-card">
+                    {num}
+                  </span>
+                ))}
+              </strong>  
+            </div>
+
+            <div>
+              <strong>Blocked Output Q:{progState.blockedOutputQ.map((num, idx) => (
+                  <span key={idx} className="queue-card">
+                    {num}
+                  </span>
+                ))}
+              </strong>
+            </div>
+
+            <div>
+              <strong>Blocked General Q:{progState.blockedGeneralQ.map((num, idx) => (
+                  <span key={idx} className="queue-card">
+                    {num}
+                  </span>
+                ))}
+              </strong>
+                
+            </div>
+
+            <div>
+              <strong>Ready Q:{progState.readyQ.map((num, idx) => (
+                  <span key={idx} className="queue-card">
+                    {num}
+                  </span>
+                ))}
+              </strong>
+            </div>
+                    </div>
+              
+                  </div>
+                </div>
+  );
+  
 };
 
 export default FormComponent;
