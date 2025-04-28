@@ -34,6 +34,7 @@ const FormComponent: React.FC = () => {
     upperBound: number;
     code: string[];
     vars: string[];
+    fileName: string;
   }
   
   interface Queues {
@@ -157,8 +158,7 @@ const FormComponent: React.FC = () => {
         
       
       
-    } catch (e) {
-    }
+    } catch (e) { /* empty */ }
   };
 
   const handleNext = async (e: React.FormEvent) => {
@@ -178,8 +178,7 @@ const FormComponent: React.FC = () => {
       if (!exited) setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
-    } catch {
-    }
+    } catch { /* empty */ }
   };
 
 
@@ -248,8 +247,7 @@ const FormComponent: React.FC = () => {
       if (!exited) setOutput(stdout)
       
       setMessage(data.message); // Assuming the server sends a response with a message
-    } catch  {
-    }
+    } catch  { /* empty */ }
   };
 
   return (
@@ -332,6 +330,7 @@ const FormComponent: React.FC = () => {
           <h2>Memory</h2>
           {progState.memory.map((proc, index) => (
             (proc.state != "" && (<div key={index} className="process-card">
+              <p><strong>Program Name:</strong> {proc.fileName}</p>
               <p><strong>PID:</strong> {proc.pid}</p>
               <p><strong>State:</strong> {proc.state}</p>
               <p><strong>Priority:</strong> {proc.priority}</p>
@@ -342,7 +341,7 @@ const FormComponent: React.FC = () => {
             </div>))
           ))}
         </div>
-  
+
         {/* COLUMN 3: Program State */}
         <div className="state-section">
           <h2>Program State</h2>

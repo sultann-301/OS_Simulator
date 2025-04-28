@@ -42,6 +42,7 @@ function empty_dumpster(filename) {
               pc: 0,
               lowerBound: 0,
               upperBound: 0,
+              fileName: "",
               code: Array(11).fill(""),
               vars: Array(3).fill("")
           },
@@ -52,6 +53,7 @@ function empty_dumpster(filename) {
               pc: 0,
               lowerBound: 0,
               upperBound: 0,
+              fileName: "",
               code: Array(11).fill(""),
               vars: Array(3).fill("")
           },
@@ -62,6 +64,7 @@ function empty_dumpster(filename) {
               pc: 0,
               lowerBound: 0,
               upperBound: 0,
+              fileName:"",
               code: Array(11).fill(""),
               vars: Array(3).fill("")
           }
@@ -102,7 +105,7 @@ app.post('/spawn', (req, res) => {
     child.stdout.on('data', (data) => {
       output = ""
       console.log(data.toString().trim())
-      output += "OUTPUT DETECTEDDDD\n";
+      // output += "OUTPUT DETECTEDDDD\n";
       output += data.toString().trim() + "\n";
     });
   }
@@ -118,7 +121,7 @@ app.post('/spawn', (req, res) => {
     return;
   });
   setTimeout(() => {
-    if (!childExited) res.send('');
+    if (!childExited) res.send({stdout: output});
   }, 1500);
 });
 
@@ -176,15 +179,6 @@ app.post('/simulate', (req, res) => {
   }
   
   setTimeout(() => {
-      // fs.readFile('dumpster.txt', 'utf8', (err, file) => {
-      //     if (err) {
-      //         console.error('Error reading file:', err);
-      //         return;
-      //     }
-      //     const cleaned = file.replace(/[\u0000-\u001F]/g, '');
-      //     programState = JSON.parse(cleaned);
-      // });
-      
       res.send({stdout: output, data : programState});
       
   }, 200);
