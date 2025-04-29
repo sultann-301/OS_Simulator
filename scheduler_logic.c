@@ -806,8 +806,20 @@ int MLFQ_time()
         while(isEmpty(&qs[lvl]) == 1){
             lvl++;
         } 
+        if (quantumLefts[peek(&qs[lvl])] != 0) {
+            quantumLefts[peek(&qs[lvl])]--;
+            return peek(&qs[lvl]);
+        }
+        int zeroLeft = dequeue(&qs[lvl]);
+        enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], zeroLeft);
+        memory[zeroLeft].priority > 3 ? 4 : memory[zeroLeft].priority++;
+        quantumLefts[zeroLeft] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
+        while(isEmpty(&qs[lvl]) == 1){
+            lvl++;
+        }
         quantumLefts[peek(&qs[lvl])]--;
         return peek(&qs[lvl]);
+        
     }
 
     quantumLefts[curr_id]--;
@@ -1046,6 +1058,23 @@ int main(int argc, char *argv[]) {
         }
         currProcess = schedulers[sched_code]();
         executeNextLine(currProcess);
+        if (sched_code == 2){
+            int lvl = 0;
+            while(isEmpty(&qs[lvl]) == 1){
+                lvl++;
+            } 
+            if(memory[currProcess].pc >= codeCounts[currProcess])
+            {
+                dequeue(&qs[lvl]);
+            }
+        }
+        else{
+            if(memory[currProcess].pc >= codeCounts[currProcess])
+            {
+                dequeue(&readyQ);
+            }
+        }
+        
         dump_state_to_json("dumpster.txt");
         fflush(stdout);
         if (mode == 1) {
