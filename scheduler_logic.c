@@ -797,7 +797,7 @@ int MLFQ_time()
         return curr_id;
     }
     
-    if(quantumLefts[curr_id] == 0)
+    while(quantumLefts[curr_id] == 0)
     {
         dequeue(&qs[lvl]);
         enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], curr_id);
@@ -810,15 +810,16 @@ int MLFQ_time()
             quantumLefts[peek(&qs[lvl])]--;
             return peek(&qs[lvl]);
         }
-        int zeroLeft = dequeue(&qs[lvl]);
-        enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], zeroLeft);
-        memory[zeroLeft].priority > 3 ? 4 : memory[zeroLeft].priority++;
-        quantumLefts[zeroLeft] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
-        while(isEmpty(&qs[lvl]) == 1){
-            lvl++;
-        }
-        quantumLefts[peek(&qs[lvl])]--;
-        return peek(&qs[lvl]);
+        curr_id =  peek(&qs[lvl]);
+        // int zeroLeft = dequeue(&qs[lvl]);
+        // enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], zeroLeft);
+        // memory[zeroLeft].priority > 3 ? 4 : memory[zeroLeft].priority++;
+        // quantumLefts[zeroLeft] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
+        // while(isEmpty(&qs[lvl]) == 1){
+        //     lvl++;
+        // }
+        // quantumLefts[peek(&qs[lvl])]--;
+        // return peek(&qs[lvl]);
         
     }
 

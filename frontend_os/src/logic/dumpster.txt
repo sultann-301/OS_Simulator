@@ -1,109 +1,57 @@
 {
-  "id": 0,
+  "id": 3,
   "userInputLock": -1,
   "fileLock": -1,
   "userOutputLock": -1,
-  "quantum": 0,
-  "sched_code": -1,
-  "currProcess": -1,
+  "quantum": 1,
+  "sched_code": 2,
+  "currProcess": 2,
   "qs": {
-    "level1": [],
-    "level2": [],
-    "level3": [],
-    "level4": []
+  "level1": [],
+  "level2": [],
+  "level3": [],
+  "level4": []
   },
-  "quantumLefts": [
-    0,
-    0,
-    0
-  ],
+  "quantumLefts": [0, 2, 7],
   "memory": [
     {
       "pid": 0,
-      "state": "",
-      "priority": 0,
-      "pc": 0,
+      "state": "Terminated",
+      "priority": 3,
+      "pc": 7,
       "lowerBound": 0,
-      "upperBound": 0,
-      "fileName": "",
-      "code": [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-      ],
-      "vars": [
-        "",
-        "",
-        ""
-      ]
+      "upperBound": 15,
+      "fileName":  "Program_1.txt",
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait userOutput", "printFromTo a b", "semSignal userOutput", "", "", "", ""],
+      "vars": ["a : 1", "b : 1", "var3 : "]
     },
     {
-      "pid": 0,
-      "state": "",
-      "priority": 0,
-      "pc": 0,
-      "lowerBound": 0,
-      "upperBound": 0,
-      "fileName": "",
-      "code": [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-      ],
-      "vars": [
-        "",
-        "",
-        ""
-      ]
+      "pid": 1,
+      "state": "Terminated",
+      "priority": 3,
+      "pc": 7,
+      "lowerBound": 16,
+      "upperBound": 31,
+      "fileName":  "Program_2.txt",
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait file", "writeFile a b", "semSignal file", "", "", "", ""],
+      "vars": ["a : 1", "b : 1", "var3 : "]
     },
     {
-      "pid": 0,
-      "state": "",
-      "priority": 0,
-      "pc": 0,
-      "lowerBound": 0,
-      "upperBound": 0,
-      "fileName": "",
-      "code": [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
-      ],
-      "vars": [
-        "",
-        "",
-        ""
-      ]
+      "pid": 2,
+      "state": "Terminated",
+      "priority": 4,
+      "pc": 9,
+      "lowerBound": 32,
+      "upperBound": 49,
+      "fileName":  "Program_3.txt",
+      "code": ["semWait userInput", "assign a input", "semSignal userInput", "semWait file", "assign b readFile a", "semSignal file", "semWait userOutput", "print b", "semSignal userOutput", "", ""],
+      "vars": ["a : 1", "b : 1", "var3 : "]
     }
   ],
   "blockedFileQ": [],
   "blockedInputQ": [],
   "blockedOutputQ": [],
-  "blockedGeneralQ": [],
   "readyQ": [],
-  "clock": 0
+  "blockedGeneralQ": [0, 0, 0],
+  "clock": 22
 }
