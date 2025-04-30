@@ -65,7 +65,7 @@ let childExited = false;
 app.post('/spawn', (req, res) => {
   const {formData, mode} = req.body
 
-  child = spawn('./a.out', [mode,...Object.values(formData).map(value => value.trim() === "" ? "$" : value)]);
+  child = spawn('./a.exe', [mode,...Object.values(formData).map(value => value.trim() === "" ? "$" : value)]);
   if (child.stdout.listenerCount('data') === 0) {
     child.stdout.on('data', (data) => {
       output = ""
