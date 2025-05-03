@@ -1,42 +1,311 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* FormComponent.css */
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Giga:wght@100..900&display=swap');
+
+h1{
+  color: #5f4bb6;
   text-align: center;
+  font-size: 64px;
+  font-weight: 800;
+  font-family: 'Lexend Giga', 'Courier New', monospace;
+  margin-top: 1px;
+  margin-bottom: 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background-color: #f9f9fb;
+  min-height: 100vh;
+  min-width: 100vw;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.main-sections {
+  display: grid;
+  grid-template-columns: 31% 31% 31%;
+  gap: 2rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.form-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
-.card {
-  padding: 2em;
+.form-section h2 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
 }
 
-.read-the-docs {
-  color: #888;
+.form-section:hover {
+  transform: translateY(-5px);
+}
+
+form > div {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+input[type="text"] {
+  width: 80%; /* Reduced width to prevent overflow */
+  padding: 0.6rem 1rem;
+  border: 2px solid #ccc;
+  border-radius: 0.5rem;
+  background-color: #fff; /* White background */
+  color: #7f5af0; /* Purple text color */
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #7f5af0;
+  background-color: #f0f0f0; /* Light grey background on focus */
+  outline: none;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  background-color: #7f5af0;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background-color: #6246ea;
+  transform: scale(1.05);
+}
+
+.console-output {
+  background-color: #fff; /* White background */
+  color: #7f5af0; /* Purple text color */
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-top: 2rem;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.95rem;
+  min-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid #ccc; /* Lighter border */
+}
+
+.state-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+h2, h3 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
+}
+
+.clock-highlight {
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.queues-container {
+  margin-bottom: 1rem;
+}
+
+.queues-container > div,
+.state-section > div {
+  margin-bottom: 1rem;
+}
+
+strong {
+  color: #333;
+}
+
+.process-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.process-card:hover {
+  transform: scale(1.02);
+}
+
+.queues-container div,
+.state-section div > strong + div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.queues-container div > strong,
+.state-section div > strong {
+  flex: 0 0 100%;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.queues-container div > span,
+.state-section div > span {
+  background-color: #d4d4fc;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+/* Fancy Queue Items */
+.queues-container span,
+.state-section span {
+  background: #eaeaff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  box-shadow: inset 0 0 4px rgba(127, 90, 240, 0.5);
+  font-size: 0.9rem;
+}
+
+/* General Messages */
+p {
+  color: #666;
+}
+
+/* Smooth scrolling inside output */
+.console-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-output::-webkit-scrollbar-thumb {
+  background-color: #7f5af0;
+  border-radius: 4px;
+}
+
+/* Memory Section */
+.memory-section {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.memory-section h2 {
+  color: #5f4bb6;
+  margin-bottom: 1rem;
+}
+
+.memory-section .process-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.memory-section .process-card:hover {
+  transform: scale(1.02);
+}
+
+.memory-section .process-card div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.memory-section .process-card p {
+  margin: 0;
+}
+
+.memory-section .process-card p strong {
+  color: #333;
+}
+
+.memory-section .process-card .process-info {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.memory-section .process-card .process-info div {
+  flex: 1 1 45%;
+}
+
+/* Queue Cards Layout */
+.state-section .queues-container span {
+  display: inline-block;
+  background-color: #d4d4fc;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 1rem;
+  margin: 0.25rem;
+  box-shadow: inset 0 0 4px rgba(127, 90, 240, 0.5);
+}
+
+.queues-container > div, .state-section > div {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 2px solid #ccc;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #5f4bb6;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+select:focus {
+  border-color: #7f5af0;
+  background-color: #f0f0ff;
+  outline: none;
+}
+
+.queue-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.queue-card {
+  background-color: #fafafa;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9rem;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+form button{
+  margin: 4px;
 }

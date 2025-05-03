@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -10,15 +11,16 @@ FILE *fptr;
 
 int id = 0;
 int lastWord= 0;
-int userInputLock = 0;
-int fileLock = 0;
-int userOutputLock = 0;
+int userInputLock = -1;
+int fileLock = -1;
+int userOutputLock = -1;
 int varCounts[3];
 int codeCounts[3];
 int quantumLeft = 3;
 int quantum = 3;
 int clock = 0;
 int sched_code = 0;
+int currProcess = 0;
 
 struct Process {
     int pid;                
@@ -29,6 +31,7 @@ struct Process {
     int upperBound; 
     char code[11][100]; //awaiting wedding suns's confirmation ...
     char vars[3][50];
+    char fileName[100];
 };
 
 //QUEUES AND SCHEDULERS
@@ -214,7 +217,7 @@ struct Process memory[3];
 struct PriorityQueue blockedFileQ;
 struct PriorityQueue blockedInputQ;
 struct PriorityQueue blockedOutputQ;
-struct PriorityQueue blockedGeneralQ;
+int blockedGeneralQ[3] = {0,0,0};
 struct Queue readyQ;
 
 
@@ -261,6 +264,7 @@ void trim(char *str) {
     }
     *dst = '\0';  // null-terminate the result
 }
+
 
 char* getVariableValue(const char* key, char vars[3][50]) {
     size_t key_len = strlen(key);
@@ -357,6 +361,8 @@ void readProgram(const char *filename, char program[12][100]) {
         if (fptr == NULL)
     {
       printf("ERROR FILE NOT FOUND");
+      fflush(stdout);
+      exit(1);
     } else {
     
       //Store the content of the file
@@ -385,6 +391,7 @@ void storeProgram(char program[12][100]){
     p.pc = 0;
     p.lowerBound = lastWord;
     p.upperBound = lastWord + programSize - 1;
+    strcpy(p.fileName, "");
     codeCounts[id] = countLines(program);
     varCounts[id] = 0;
     
@@ -477,16 +484,18 @@ void execute(char line[100], struct Process *p){
     struct Line l = parse(line);
     
     if (strcmp(l.operation, "print") == 0){
-        printf("%s\n", getVariableValue(l.op1, p->vars));
+        printf(" (%s) : %s\n", p->fileName, getVariableValue(l.op1, p->vars));
         return;
     }
 
     if (strcmp(l.operation, "printFromTo") == 0){
+        printf(" (%s) : ", p->fileName);
         func1(atoi(getVariableValue(l.op1, p->vars)), atoi(getVariableValue(l.op2, p->vars)));
         return;
     }
 
     if (strcmp(l.operation, "writeFile") == 0){
+        printf(" (%s) : Wrote file", p->fileName);
         if(strncmp(l.op2, "readFile ", 9) == 0) {
             struct Line nestedLine = parse(l.op2);
             sprintf(l.op2 , "%s", func3ThatReturnsInsteadOfPrints(getVariableValue(nestedLine.op1, p->vars)));
@@ -496,12 +505,14 @@ void execute(char line[100], struct Process *p){
     }
 
     if (strcmp(l.operation, "readFile") == 0){
+        printf("(%s) : ", p->fileName);
         func3(getVariableValue(l.op1, p->vars));
         return;
     }
 
     
     if (strcmp(l.operation, "assign") == 0){
+       
         char input[100];
         sprintf(input, "%s", l.op2);
         if(strncmp(l.op2, "readFile ", 9) == 0) {
@@ -509,9 +520,10 @@ void execute(char line[100], struct Process *p){
             sprintf(input , "%s", func3ThatReturnsInsteadOfPrints(getVariableValue(nestedLine.op1, p->vars)));
         }
         if (strcmp(l.op2, "input") == 0){
-            printf("Please enter a value\n");
+            printf("(%s) : Please enter a value\n", p->fileName);
             fflush(stdout);
             scanf("%s", input);
+             printf("(%s) : Assigned variable\n", p->fileName);
         }
         
         char seperator[] = " : ";
@@ -524,20 +536,20 @@ void execute(char line[100], struct Process *p){
     if (strcmp(l.operation, "semWait") == 0){
         if(strcmp(l.op1, "userInput") == 0)
         {
-            if(userInputLock == 0)
+            if(userInputLock == -1)
             {
-                printf("Process (%d) acquired user input \n", p->pid );
-                userInputLock = 1;
+                printf("(%s) acquired user input \n", p->fileName );
+                userInputLock = p->pid;
 
             } else {
                 //place in blocked queue for userInput
-                printf("Process (%d) was blocked for user input \n", p->pid );
+                printf("(%s) was blocked for user input \n", p->fileName);
                 if(sched_code == 0|| sched_code == 1)
                 {
                    
                     int peeked_id =   dequeue(&readyQ);
                     quantumLeft = quantum;
-                    printf("Removed Process (%d) from the ready queue \n", peeked_id);
+                    printf("Removed (%s) from the ready queue \n", memory[peeked_id].fileName);
                     // printf(" next in line for execution: (%d)\n \n", peek(&readyQ));
 
                 } else {
@@ -551,7 +563,7 @@ void execute(char line[100], struct Process *p){
                 }
                
                 enqueuePQ(&blockedInputQ, p->pid);
-                enqueuePQ(&blockedGeneralQ, p->pid);
+                blockedGeneralQ[p->pid] = 1;
                 strcpy(memory[p->pid].state, "Blocked");
 
             }  
@@ -559,13 +571,13 @@ void execute(char line[100], struct Process *p){
 
         if(strcmp(l.op1, "userOutput") == 0)
         {
-            if(userOutputLock == 0)
+            if(userOutputLock == -1)
             {
-                printf("Process (%d) acquired user output \n", p->pid );
-                userOutputLock = 1;
+                printf("(%s) acquired user output \n", p->fileName );
+                userOutputLock = p->pid;
             } else {
                 //place in blocked queue for userOutput
-                printf("Process (%d) was blocked for user output \n", p->pid );
+                printf("(%s) was blocked for user output \n", p->fileName );
                 if(sched_code == 0 || sched_code == 1)
                 {
                     dequeue(&readyQ);
@@ -584,7 +596,7 @@ void execute(char line[100], struct Process *p){
                
                
                 enqueuePQ(&blockedOutputQ, p->pid);
-                enqueuePQ(&blockedGeneralQ, p->pid);
+                blockedGeneralQ[p->pid] = 1;
                 strcpy(memory[p->pid].state, "Blocked");
 
 
@@ -595,13 +607,13 @@ void execute(char line[100], struct Process *p){
 
         if(strcmp(l.op1, "file") == 0)
         {
-            if(fileLock == 0)
+            if(fileLock == -1)
             {
-                printf("Process (%d) acquired file access \n", p->pid );
-                fileLock = 1;
+                printf("(%s) acquired file access \n", p->fileName );
+                fileLock = p->pid;
             } else {
                 //place in blocked queue for file
-                printf("Process (%d) was blocked for file access \n", p->pid );
+                printf("(%s) was blocked for file access \n", p->fileName );
 
                 if(sched_code == 0 || sched_code == 1)
                 {
@@ -621,7 +633,7 @@ void execute(char line[100], struct Process *p){
                 }
                
                 enqueuePQ(&blockedFileQ, p->pid);
-                enqueuePQ(&blockedGeneralQ, p->pid);
+                blockedGeneralQ[p->pid] = 1;
                 strcpy(memory[p->pid].state, "Blocked");
 
             }
@@ -633,13 +645,14 @@ void execute(char line[100], struct Process *p){
     if (strcmp(l.operation, "semSignal") == 0){
          if(strcmp(l.op1, "userInput") == 0)
         {
-            userInputLock = 0; 
-            printf("Process (%d) released user input \n", p->pid );
+            userInputLock = -1; 
+            printf("(%s) released user input \n", p->fileName );
             //remove first guy from blocked queue
             int unblocked_id = dequeuePQ(&blockedInputQ);
-        
             if(unblocked_id == -1) return; //do not continue if blockedqueue is empty
-            printf("Process (%d) acquired user input \n", unblocked_id );
+            blockedGeneralQ[unblocked_id] = 0;
+            printf("(%s) acquired user input \n", memory[unblocked_id].fileName );
+            userInputLock = unblocked_id;
             strcpy(memory[unblocked_id].state, "Ready");
 
             if(sched_code == 0 || sched_code == 1)
@@ -656,13 +669,14 @@ void execute(char line[100], struct Process *p){
 
         if(strcmp(l.op1, "userOutput") == 0)
         {
-            userOutputLock = 0; 
+            userOutputLock = -1; 
              //remove first guy from blocked queue
-             printf("Process (%d) released user output \n", p->pid );
+             printf("(%s) released user output \n", p->fileName );
              int unblocked_id = dequeuePQ(&blockedOutputQ);
              if(unblocked_id == -1) return; //do not continue if blockedqueue is empty
-             printf("Process (%d) acquired user output \n", unblocked_id );
-
+             blockedGeneralQ[unblocked_id] = 0;
+             printf("(%s) acquired user output \n", memory[unblocked_id].fileName );
+             userOutputLock = unblocked_id;
              strcpy(memory[unblocked_id].state, "Ready");
              if(sched_code == 0 || sched_code == 1)
                 {
@@ -677,12 +691,14 @@ void execute(char line[100], struct Process *p){
 
         if(strcmp(l.op1, "file") == 0)
         {
-            fileLock = 0; 
+            fileLock = -1; 
             //remove first guy from blocked queue
-            printf("Process (%d) released file access \n", p->pid );
+            printf("(%s) released file access \n", p->fileName );
             int unblocked_id = dequeuePQ(&blockedFileQ);
             if(unblocked_id == -1) return; //do not continue if blockedqueue is empty
-            printf("Process (%d) acquired file access \n", unblocked_id );
+            blockedGeneralQ[unblocked_id] = 0;
+            printf("(%s) acquired file access \n", memory[unblocked_id].fileName);
+            fileLock = unblocked_id;
             strcpy(memory[unblocked_id].state, "Ready");
             if(sched_code == 0 || sched_code == 1)
                 {
@@ -704,14 +720,10 @@ void executeNextLine(int id){
         // printf("Process (%d) is executing this line (%s) \n", id,memory[id].code[memory[id].pc]);
         execute(memory[id].code[memory[id].pc], &memory[id]);
         memory[id].pc++;
-    }
-    else{
-        if(id != -1)
-        {
-            printf("PROCESS (%d) FINISHED EXECUTION !!!\n", id);
+        if (memory[id].pc == codeCounts[id]) {
+            printf("(%s) FINISHED EXECUTION !!!\n", memory[id].fileName);
+            strcpy(memory[id].state, "Terminated");
         }
-        
-        // idk what to do when finish
     }
 }
 
@@ -785,7 +797,7 @@ int MLFQ_time()
         return curr_id;
     }
     
-    if(quantumLefts[curr_id] == 0)
+    while(quantumLefts[curr_id] == 0)
     {
         dequeue(&qs[lvl]);
         enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], curr_id);
@@ -794,8 +806,21 @@ int MLFQ_time()
         while(isEmpty(&qs[lvl]) == 1){
             lvl++;
         } 
-        quantumLefts[peek(&qs[lvl])]--;
-        return peek(&qs[lvl]);
+        if (quantumLefts[peek(&qs[lvl])] != 0) {
+            quantumLefts[peek(&qs[lvl])]--;
+            return peek(&qs[lvl]);
+        }
+        curr_id =  peek(&qs[lvl]);
+        // int zeroLeft = dequeue(&qs[lvl]);
+        // enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], zeroLeft);
+        // memory[zeroLeft].priority > 3 ? 4 : memory[zeroLeft].priority++;
+        // quantumLefts[zeroLeft] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
+        // while(isEmpty(&qs[lvl]) == 1){
+        //     lvl++;
+        // }
+        // quantumLefts[peek(&qs[lvl])]--;
+        // return peek(&qs[lvl]);
+        
     }
 
     quantumLefts[curr_id]--;
@@ -844,6 +869,7 @@ void dump_state_to_json(const char *filename) {
     fprintf(f, "  \"userOutputLock\": %d,\n", userOutputLock);
     fprintf(f, "  \"quantum\": %d,\n", quantum);
     fprintf(f, "  \"sched_code\": %d,\n", sched_code);
+    fprintf(f, "  \"currProcess\": %d,\n", currProcess);
 
     // queues
     
@@ -873,6 +899,8 @@ void dump_state_to_json(const char *filename) {
         fprintf(f, "      \"pc\": %d,\n", p->pc);
         fprintf(f, "      \"lowerBound\": %d,\n", p->lowerBound);
         fprintf(f, "      \"upperBound\": %d,\n", p->upperBound);
+        fprintf(f, "      \"fileName\":  \"%s\",\n", p->fileName);
+        
         // code lines
         fprintf(f, "      \"code\": [");
         for (int j = 0; j < 11; ++j) {
@@ -902,10 +930,12 @@ void dump_state_to_json(const char *filename) {
     print_prioq(f, "blockedFileQ", &blockedFileQ); fprintf(f, ",\n");
     print_prioq(f, "blockedInputQ", &blockedInputQ); fprintf(f, ",\n");
     print_prioq(f, "blockedOutputQ", &blockedOutputQ); fprintf(f, ",\n");
-    print_prioq(f, "blockedGeneralQ", &blockedGeneralQ); fprintf(f, ",\n");
+    
 
     // readyQ
     print_queue(f, "readyQ", &readyQ); fprintf(f, ",\n");
+    fprintf(f, "  \"blockedGeneralQ\": [%d, %d, %d],\n", blockedGeneralQ[0], blockedGeneralQ[1], blockedGeneralQ[2]);
+
 
     // clock
     fprintf(f, "  \"clock\": %d\n", clock);
@@ -919,23 +949,39 @@ void dump_state_to_json(const char *filename) {
 
 int main(int argc, char *argv[]) {
     // Check if enough arguments are provided
-    if (argc != 9) {
-        printf("Usage: %s <sched_code> <arrival1> <arrival2> <arrival3> <quantum> <path1> <path2> <path3>\n", argv[0]);
+    if (argc != 10) {
+        printf("Usage: %s <mode> <sched_code> <arrival1> <arrival2> <arrival3> <quantum> <path1> <path2> <path3>\n", argv[0]);
         return 1; // Return with error code
     }
     char program1 [12][100];
     char program2 [12][100];
     char program3 [12][100];
+    int p1 = 0;
+    int p2 = 0;
+    int p3 = 0;
 
     // Parse arguments from the command line
-    sched_code = atoi(argv[1]);   // Convert the argument to int
-    int arrival1 = atoi(argv[2]);
-    int arrival2 = atoi(argv[3]);
-    int arrival3 = atoi(argv[4]);
-    quantum = atoi(argv[5]);
-    readProgram(argv[6], program1);
-    readProgram(argv[7], program2);
-    readProgram(argv[8], program3);
+    sched_code = atoi(argv[2]);   // Convert the argument to int
+    int arrival1 = atoi(argv[3]);
+    int arrival2 = atoi(argv[4]);
+    int arrival3 = atoi(argv[5]);
+    int mode = atoi(argv[1]);
+    quantum = atoi(argv[6]);
+    trim(argv[7]);
+    trim(argv[8]);
+    trim(argv[9]);
+    if (strcmp(argv[7], "$") != 0) {
+        readProgram(argv[7], program1);
+        p1 = 1;
+    }
+    if (strcmp(argv[8], "$") != 0) {
+        readProgram(argv[8], program2);
+        p2 = 1;
+    }
+    if (strcmp(argv[9], "$") != 0) {
+        readProgram(argv[9], program3);
+        p3 = 1;
+    }
 
     int (*schedulers[])() = { FIFO_time, RR_time, MLFQ_time };
     int (*notDone[])() = { notEmptyReadyQ, notEmptyReadyQ, isMLFQFull };
@@ -967,69 +1013,80 @@ int main(int argc, char *argv[]) {
 
     int x = 1;
     while(notDone[sched_code]() == 1 || clock <= maxArrival)
-    {   if(x == 2)
+    {   
+        
+        if(x == 2)
         {
-            return 0;
+            return 2;
+        }
+        int progIndex = 7;
+
+        if(clock == arrival1 && p1 != 0){
+            
+            if (sched_code == 2) enqueue(&qs[0], id);
+            else{
+                enqueue(&readyQ, id);
+            }  
+
+            storeProgram(program1);
+            strcpy(memory[id-1].fileName, argv[7]);
+            printf("(%s) arrived!\n", memory[id-1].fileName);
+    
+    
+        }
+        if(clock == arrival2 && p2 != 0){
+            
+            if (sched_code == 2) enqueue(&qs[0], id);
+            else{
+                enqueue(&readyQ, id);
+            } 
+            storeProgram(program2);
+            strcpy(memory[id-1].fileName, argv[8]);
+            printf("(%s) arrived!\n", memory[id-1].fileName);
+   
+
+        }
+        if(clock == arrival3 && p3 != 0){
+            if (sched_code == 2) enqueue(&qs[0], id);
+            else{
+                enqueue(&readyQ, id);
+            } 
+            storeProgram(program3);
+            strcpy(memory[id-1].fileName, argv[9]);
+            printf("(%s) arrived!\n", memory[id-1].fileName);
+
+
+        }
+        currProcess = schedulers[sched_code]();
+        executeNextLine(currProcess);
+        if (sched_code == 2){
+            int lvl = 0;
+            while(isEmpty(&qs[lvl]) == 1){
+                lvl++;
+            } 
+            if(memory[currProcess].pc >= codeCounts[currProcess])
+            {
+                dequeue(&qs[lvl]);
+            }
+        }
+        else{
+            if(memory[currProcess].pc >= codeCounts[currProcess])
+            {
+                dequeue(&readyQ);
+            }
         }
         
-
-        if(clock == arrival1){
-            printf("Process (%d) arrived!\n", id);
-            enqueue(&qs[0], id);
-            enqueue(&readyQ, id);
-            storeProgram(program1);
-    
-    
-        }
-        if(clock == arrival2){
-            printf("Process (%d) arrived!\n", id);
-            enqueue(&qs[0], id);
-            enqueue(&readyQ, id);
-            storeProgram(program2);
-        }
-        if(clock == arrival3){
-            printf("Process (%d) arrived!\n", id);
-            enqueue(&qs[0], id);
-            enqueue(&readyQ, id);
-            storeProgram(program3);
-        }
-        // printQueue(&readyQ);
-        // printf("Q state: %d \n",isEmpty(&readyQ));
-        // printf("Code counts 2:  %d \n", codeCounts[0]);
-        // dump_state_to_json("dumpster.txt");
-        // printf("sched code: %d \n", sched_code);
-        executeNextLine(schedulers[sched_code]());
         dump_state_to_json("dumpster.txt");
         fflush(stdout);
-        while(!scanf("%d", &x));
+        if (mode == 1) {
+            while(!scanf("%d", &x));
+        }
+        else{
+            sleep(3);
+        }
         clock++;
-        
-        // printf("2's pc:%d \n", memory[0].pc);
+
     }
-    
-
-    
-    // for (int i = 0; i < 3; i++) {
-    //     struct Process p = memory[i];
-    //     printf("----- Process Information -----\n");
-    //     printf("PID: %d\n", p.pid);
-    //     printf("State: %s\n", p.state);
-    //     printf("Priority: %d\n", p.priority);
-    //     printf("Program Counter (PC): %d\n", p.pc);
-    //     printf("Memory Bounds: [%d - %d]\n", p.lowerBound, p.upperBound);
-        
-    //     printf("\nVariables (%d):\n", varCounts[p.pid]);
-    //     for (int i = 0; i < varCounts[p.pid]; i++) {
-    //         printf("  Var[%d]: %s\n", i, p.vars[i]);
-    //     }
-
-    //     printf("\nCode (%d lines):\n", codeCounts[p.pid]);
-    //     for (int i = 0; i < codeCounts[p.pid]; i++) {
-    //         printf("  [%d]: %s\n", i, p.code[i]);
-    //     }
-    //     printf("--------------------------------\n");
-    // }
-
 
     return 0;
     
