@@ -1,75 +1,57 @@
 {
   "id": 3,
-  "userInputLock": 0,
-<<<<<<< HEAD
-  "fileLock": 0,
-  "userOutputLock": 0,
-=======
+  "userInputLock": 2,
   "fileLock": -1,
-  "userOutputLock": -1,
->>>>>>> actualBasicallyDoneBranch
-  "quantum": 1,
+  "userOutputLock": 0,
+  "quantum": 2,
   "sched_code": 2,
-  "currProcess": 2,
+  "currProcess": 1,
   "qs": {
   "level1": [],
-  "level2": [0],
-  "level3": [],
-  "level4": []
+  "level2": [2],
+  "level3": [1],
+  "level4": [0]
   },
-  "quantumLefts": [2, 1, 1],
+  "quantumLefts": [8, 3, 2],
   "memory": [
     {
       "pid": 0,
       "state": "Ready",
-<<<<<<< HEAD
-      "priority": 1,
+      "priority": 4,
       "pc": 7,
-=======
-      "priority": 2,
-      "pc": 1,
->>>>>>> actualBasicallyDoneBranch
       "lowerBound": 0,
-      "upperBound": 15,
-      "fileName":  "Program_1.txt",
-      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait userOutput", "printFromTo a b", "semSignal userOutput", "", "", "", ""],
-      "vars": ["a : 0", "b : 0", "var3 : "]
+      "upperBound": 17,
+      "fileName":  "Program_3.txt",
+      "code": ["semWait userInput", "assign a input", "semSignal userInput", "semWait file", "assign b readFile a", "semSignal file", "semWait userOutput", "print b", "semSignal userOutput", "", ""],
+      "vars": ["a : 3", "b : (null)", "var3 : "]
     },
     {
       "pid": 1,
-      "state": "Blocked",
-      "priority": 1,
-      "pc": 7,
-      "lowerBound": 16,
-      "upperBound": 31,
-      "fileName":  "Program_2.txt",
-      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait file", "writeFile a b", "semSignal file", "", "", "", ""],
-      "vars": ["a : 0", "b : 0", "var3 : "]
+      "state": "Ready",
+      "priority": 3,
+      "pc": 4,
+      "lowerBound": 18,
+      "upperBound": 33,
+      "fileName":  "Program_1.txt",
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait userOutput", "printFromTo a b", "semSignal userOutput", "", "", "", ""],
+      "vars": ["a : 8", "b : 9", "var3 : "]
     },
     {
       "pid": 2,
       "state": "Ready",
-      "priority": 1,
-      "pc": 9,
-      "lowerBound": 32,
+      "priority": 2,
+      "pc": 1,
+      "lowerBound": 34,
       "upperBound": 49,
-      "fileName":  "Program_3.txt",
-      "code": ["semWait userInput", "assign a input", "semSignal userInput", "semWait file", "assign b readFile a", "semSignal file", "semWait userOutput", "print b", "semSignal userOutput", "", ""],
-      "vars": ["a : 0", "b : 0", "var3 : "]
+      "fileName":  "Program_2.txt",
+      "code": ["semWait userInput", "assign a input", "assign b input", "semSignal userInput", "semWait file", "writeFile a b", "semSignal file", "", "", "", ""],
+      "vars": ["var1 : ", "var2 : ", "var3 : "]
     }
   ],
   "blockedFileQ": [],
-<<<<<<< HEAD
   "blockedInputQ": [],
   "blockedOutputQ": [],
-  "blockedGeneralQ": [0, 2],
   "readyQ": [],
-  "clock": 24
-=======
-  "blockedInputQ": [1, 2],
-  "blockedOutputQ": [],
-  "readyQ": [],
-  "blockedGeneralQ": [0, 1, 1],
-  "clock": 2
->>>>>>> actualBasicallyDoneBranch
+  "blockedGeneralQ": [0, 0, 0],
+  "clock": 11
 }

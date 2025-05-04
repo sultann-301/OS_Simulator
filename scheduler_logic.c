@@ -558,7 +558,7 @@ void execute(char line[100], struct Process *p){
                         lvl++;
                     } 
                     dequeue(&qs[lvl]);
-                    quantumLefts[p->pid] = pow(2, p->priority -1);
+                    // quantumLefts[p->pid] = pow(2, p->priority -1);
 
                 }
                
@@ -590,7 +590,7 @@ void execute(char line[100], struct Process *p){
                         lvl++;
                     } 
                     dequeue(&qs[lvl]);
-                    quantumLefts[p->pid] = pow(2, p->priority -1);
+                    // quantumLefts[p->pid] = pow(2, p->priority -1);
 
                 }
                
@@ -627,7 +627,7 @@ void execute(char line[100], struct Process *p){
                         lvl++;
                     } 
                     dequeue(&qs[lvl]);
-                    quantumLefts[p->pid] = pow(2, p->priority -1);
+                    // quantumLefts[p->pid] = pow(2, p->priority -1);
 
                     
                 }
@@ -660,8 +660,16 @@ void execute(char line[100], struct Process *p){
                   enqueue(&readyQ, unblocked_id);
 
                 } else {
+                    if(quantumLefts[unblocked_id] == 0){
+                        enqueue(memory[unblocked_id].priority == 4 ? &qs[3] : &qs[memory[unblocked_id].priority], unblocked_id);
+                        memory[unblocked_id].priority = memory[unblocked_id].priority == 4 ? 4 : memory[unblocked_id].priority + 1;
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
+
+                    }
+                    else{
+                        enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                    }
                     
-                    enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
                 }
                
             
@@ -684,7 +692,15 @@ void execute(char line[100], struct Process *p){
 
                 } else {
                     
-                    enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                    if(quantumLefts[unblocked_id] == 0){
+                        enqueue(memory[unblocked_id].priority == 4 ? &qs[3] : &qs[memory[unblocked_id].priority], unblocked_id);
+                        memory[unblocked_id].priority = memory[unblocked_id].priority == 4 ? 4 : memory[unblocked_id].priority + 1;
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
+
+                    }
+                    else{
+                        enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                    }                
                 }
         }
 
@@ -706,7 +722,14 @@ void execute(char line[100], struct Process *p){
 
                 } else {
                     
-                    enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                    if(quantumLefts[unblocked_id] == 0){
+                        enqueue(memory[unblocked_id].priority == 4 ? &qs[3] : &qs[memory[unblocked_id].priority], unblocked_id);
+                        memory[unblocked_id].priority = memory[unblocked_id].priority == 4 ? 4 : memory[unblocked_id].priority + 1;
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
+                    }
+                    else{
+                        enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                    }
                 }
         }
         return;
@@ -811,15 +834,6 @@ int MLFQ_time()
             return peek(&qs[lvl]);
         }
         curr_id =  peek(&qs[lvl]);
-        // int zeroLeft = dequeue(&qs[lvl]);
-        // enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], zeroLeft);
-        // memory[zeroLeft].priority > 3 ? 4 : memory[zeroLeft].priority++;
-        // quantumLefts[zeroLeft] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
-        // while(isEmpty(&qs[lvl]) == 1){
-        //     lvl++;
-        // }
-        // quantumLefts[peek(&qs[lvl])]--;
-        // return peek(&qs[lvl]);
         
     }
 
@@ -1020,7 +1034,6 @@ int main(int argc, char *argv[]) {
             return 2;
         }
         int progIndex = 7;
-
         if(clock == arrival1 && p1 != 0){
             
             if (sched_code == 2) enqueue(&qs[0], id);
@@ -1057,6 +1070,7 @@ int main(int argc, char *argv[]) {
 
 
         }
+        
         currProcess = schedulers[sched_code]();
         executeNextLine(currProcess);
         if (sched_code == 2){
@@ -1075,6 +1089,8 @@ int main(int argc, char *argv[]) {
                 dequeue(&readyQ);
             }
         }
+
+        
         
         dump_state_to_json("dumpster.txt");
         fflush(stdout);
