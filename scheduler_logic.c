@@ -39,12 +39,14 @@ struct Queue {
     int items[3];
     int front;
     int rear;
+    int size;
 };
 
 // Function to initialize the queue
 void initializeQueue(struct Queue* q){
     q->front = -1;
     q->rear = -1;
+    q->size = 0;
     for (int i = 0; i < 3; i++) {
         q->items[i] = -1;
     }
@@ -69,6 +71,7 @@ void enqueue(struct Queue* q, int value)
     }
     q->rear = (q->rear + 1) % 3;
     q->items[q->rear] = value;
+    q->size++;
 }
 
 // Function to remove an element from the queue (Dequeue
@@ -84,6 +87,7 @@ int dequeue(struct Queue* q)
     } else {
         q->front = (q->front + 1) % 3;
     }
+    q->size--;
     return value;
 }
 
@@ -484,18 +488,18 @@ void execute(char line[100], struct Process *p){
     struct Line l = parse(line);
     
     if (strcmp(l.operation, "print") == 0){
-        printf(" (%s) : %s\n", p->fileName, getVariableValue(l.op1, p->vars));
+        printf("(%s) : %s\n", p->fileName, getVariableValue(l.op1, p->vars));
         return;
     }
 
     if (strcmp(l.operation, "printFromTo") == 0){
-        printf(" (%s) : ", p->fileName);
+        printf("(%s) : ", p->fileName);
         func1(atoi(getVariableValue(l.op1, p->vars)), atoi(getVariableValue(l.op2, p->vars)));
         return;
     }
 
     if (strcmp(l.operation, "writeFile") == 0){
-        printf(" (%s) : Wrote file", p->fileName);
+        printf("(%s) : Wrote file\n", p->fileName);
         if(strncmp(l.op2, "readFile ", 9) == 0) {
             struct Line nestedLine = parse(l.op2);
             sprintf(l.op2 , "%s", func3ThatReturnsInsteadOfPrints(getVariableValue(nestedLine.op1, p->vars)));
@@ -518,6 +522,7 @@ void execute(char line[100], struct Process *p){
         if(strncmp(l.op2, "readFile ", 9) == 0) {
             struct Line nestedLine = parse(l.op2);
             sprintf(input , "%s", func3ThatReturnsInsteadOfPrints(getVariableValue(nestedLine.op1, p->vars)));
+            printf("(%s) : Assigned variable\n", p->fileName);
         }
         if (strcmp(l.op2, "input") == 0){
             printf("(%s) : Please enter a value\n", p->fileName);
@@ -553,12 +558,23 @@ void execute(char line[100], struct Process *p){
                     // printf(" next in line for execution: (%d)\n \n", peek(&readyQ));
 
                 } else {
-                    int lvl = 0;
-                    while(isEmpty(&qs[lvl]) == 1){
-                        lvl++;
-                    } 
-                    dequeue(&qs[lvl]);
+                    // int lvl = 0;
+                    // while(isEmpty(&qs[lvl]) == 1){
+                    //     lvl++;
+                    // } 
+                    // dequeue(&qs[lvl]);
                     // quantumLefts[p->pid] = pow(2, p->priority -1);
+
+                    for (int lvl = 0; lvl < 4; lvl++){
+                        for (int i = 0; i < qs[lvl].size; i++){
+                            if(peek(&qs[lvl]) != currProcess){
+                                enqueue(&qs[lvl], dequeue(&qs[lvl]));
+                            }
+                            else{
+                                dequeue(&qs[lvl]);
+                            }
+                        }
+                    }
 
                 }
                
@@ -585,12 +601,23 @@ void execute(char line[100], struct Process *p){
 
 
                 } else {
-                    int lvl = 0;
-                    while(isEmpty(&qs[lvl]) == 1){
-                        lvl++;
-                    } 
-                    dequeue(&qs[lvl]);
+                    // int lvl = 0;
+                    // while(isEmpty(&qs[lvl]) == 1){
+                    //     lvl++;
+                    // } 
+                    // dequeue(&qs[lvl]);
                     // quantumLefts[p->pid] = pow(2, p->priority -1);
+
+                    for (int lvl = 0; lvl < 4; lvl++){
+                        for (int i = 0; i < qs[lvl].size; i++){
+                            if(peek(&qs[lvl]) != currProcess){
+                                enqueue(&qs[lvl], dequeue(&qs[lvl]));
+                            }
+                            else{
+                                dequeue(&qs[lvl]);
+                            }
+                        }
+                    }
 
                 }
                
@@ -622,12 +649,23 @@ void execute(char line[100], struct Process *p){
 
 
                 } else {
-                    int lvl = 0;
-                    while(isEmpty(&qs[lvl]) == 1){
-                        lvl++;
-                    } 
-                    dequeue(&qs[lvl]);
+                    // int lvl = 0;
+                    // while(isEmpty(&qs[lvl]) == 1){
+                    //     lvl++;
+                    // } 
+                    // dequeue(&qs[lvl]);
                     // quantumLefts[p->pid] = pow(2, p->priority -1);
+
+                    for (int lvl = 0; lvl < 4; lvl++){
+                        for (int i = 0; i < qs[lvl].size; i++){
+                            if(peek(&qs[lvl]) != currProcess){
+                                enqueue(&qs[lvl], dequeue(&qs[lvl]));
+                            }
+                            else{
+                                dequeue(&qs[lvl]);
+                            }
+                        }
+                    }
 
                     
                 }
@@ -668,6 +706,7 @@ void execute(char line[100], struct Process *p){
                     }
                     else{
                         enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
                     }
                     
                 }
@@ -700,6 +739,7 @@ void execute(char line[100], struct Process *p){
                     }
                     else{
                         enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
                     }                
                 }
         }
@@ -729,6 +769,7 @@ void execute(char line[100], struct Process *p){
                     }
                     else{
                         enqueue(&qs[memory[unblocked_id].priority -1], unblocked_id);
+                        quantumLefts[unblocked_id] = (int) pow(2, memory[unblocked_id].priority -1);
                     }
                 }
         }
@@ -807,38 +848,44 @@ int isMLFQFull(){
 
 int MLFQ_time()
 {
-    int curr_id;
-    int lvl = 0;
-    while(isEmpty(&qs[lvl]) == 1){
-        lvl++;
-    } 
-    curr_id = peek(&(qs[lvl]));
-    if(memory[curr_id].pc >= codeCounts[curr_id])
-    {
-        //process done
-        dequeue(&qs[lvl]);
-        return curr_id;
-    }
-    
-    while(quantumLefts[curr_id] == 0)
-    {
-        dequeue(&qs[lvl]);
-        enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], curr_id);
-        memory[curr_id].priority > 3 ? 4 : memory[curr_id].priority++;
-        quantumLefts[curr_id] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
+    if (quantumLefts[currProcess] == 0 || blockedGeneralQ[currProcess] || strcmp(memory[currProcess].state, "Terminated") == 0){
+
+        
+        int curr_id;
+        int lvl = 0;
         while(isEmpty(&qs[lvl]) == 1){
             lvl++;
         } 
-        if (quantumLefts[peek(&qs[lvl])] != 0) {
-            quantumLefts[peek(&qs[lvl])]--;
-            return peek(&qs[lvl]);
+        curr_id = peek(&(qs[lvl]));
+        if(memory[curr_id].pc >= codeCounts[curr_id])
+        {
+            //process done
+            dequeue(&qs[lvl]);
+            return curr_id;
         }
-        curr_id =  peek(&qs[lvl]);
         
-    }
+        while(quantumLefts[curr_id] == 0)
+        {
+            dequeue(&qs[lvl]);
+            enqueue(&qs[(lvl+1  > 3 )? lvl: lvl+1], curr_id);
+            memory[curr_id].priority > 3 ? 4 : memory[curr_id].priority++;
+            quantumLefts[curr_id] = (int) pow(2, (lvl+1  > 3)? lvl: lvl+1);
+            while(isEmpty(&qs[lvl]) == 1){
+                lvl++;
+            } 
+            if (quantumLefts[peek(&qs[lvl])] != 0) {
+                quantumLefts[peek(&qs[lvl])]--;
+                return peek(&qs[lvl]);
+            }
+            curr_id =  peek(&qs[lvl]);
+            
+        }
 
-    quantumLefts[curr_id]--;
-    return curr_id;
+        quantumLefts[curr_id]--;
+        return curr_id;
+    }
+    quantumLefts[currProcess]--;
+    return currProcess;
 }
 
 int notEmptyReadyQ(){
@@ -1074,13 +1121,22 @@ int main(int argc, char *argv[]) {
         currProcess = schedulers[sched_code]();
         executeNextLine(currProcess);
         if (sched_code == 2){
-            int lvl = 0;
-            while(isEmpty(&qs[lvl]) == 1){
-                lvl++;
-            } 
+            // int lvl = 0;
+            // while(isEmpty(&qs[lvl]) == 1){
+            //     lvl++;
+            // } 
             if(memory[currProcess].pc >= codeCounts[currProcess])
             {
-                dequeue(&qs[lvl]);
+                for (int lvl = 0; lvl < 4; lvl++){
+                    for (int i = 0; i < qs[lvl].size; i++){
+                        if(peek(&qs[lvl]) != currProcess){
+                            enqueue(&qs[lvl], dequeue(&qs[lvl]));
+                        }
+                        else{
+                            dequeue(&qs[lvl]);
+                        }
+                    }
+                }
             }
         }
         else{
